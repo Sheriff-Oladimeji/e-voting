@@ -22,4 +22,9 @@ async function seedAdmin() {
   console.log(`Seeded admin: ${username}`);
 }
 
-seedAdmin().then(() => process.exit(0));
+seedAdmin()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error("Failed to seed admin:", err);
+    process.exit(1);
+  });

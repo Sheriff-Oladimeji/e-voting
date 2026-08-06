@@ -61,4 +61,22 @@ describe("castVote", () => {
 
     await cleanupElection(e.id, p.id, c.id);
   });
+
+  it("rejects a vote when the candidate does not belong to the given position", async () => {
+    const { election: e, position: p, candidate: c } = await seedElection("active");
+    const [otherPosition] = await db.insert(position).values({ electionId: e.id, title: "Secretary" }).returning();
+    const studentId = "test-student-id-3";
+
+    const result = await castVote({ studentId, electionId: e.id, positionId: otherPosition.id, candidateId: c.id });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toMatch(/not running/i);
+    }
+
+    const voteRows = await db.select().from(vote).where(eq(vote.positionId, otherPosition.id));
+    expect(voteRows).toHaveLength(0);
+
+    await db.delete(position).where(eq(position.id, otherPosition.id));
+    await cleanupElection(e.id, p.id, c.id);
+  });
 });

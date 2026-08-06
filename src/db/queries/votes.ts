@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { ballot, vote, election } from "@/db/schema";
+import { ballot, vote, election, candidate } from "@/db/schema";
 import { isElectionOpen } from "@/lib/election-window";
 
 export async function castVote(input: {
@@ -14,18 +14,26 @@ export async function castVote(input: {
     return { success: false, error: "This election is not open for voting." };
   }
 
+  const [candidateRow] = await db.select().from(candidate).where(eq(candidate.id, input.candidateId));
+  if (!candidateRow || candidateRow.positionId !== input.positionId) {
+    return { success: false, error: "This candidate is not running for the selected position." };
+  }
+
   try {
-    await db.transaction(async (tx) => {
-      await tx.insert(ballot).values({
+    // drizzle-orm's neon-http driver has no support for db.transaction() — it throws
+    // "No transactions support in neon-http driver" at runtime. db.batch() is Neon's
+    // atomic alternative for the HTTP driver: both inserts commit or fail together.
+    await db.batch([
+      db.insert(ballot).values({
         studentId: input.studentId,
         electionId: input.electionId,
         positionId: input.positionId,
-      });
-      await tx.insert(vote).values({
+      }),
+      db.insert(vote).values({
         positionId: input.positionId,
         candidateId: input.candidateId,
-      });
-    });
+      }),
+    ]);
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

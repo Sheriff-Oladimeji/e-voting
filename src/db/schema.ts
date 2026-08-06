@@ -30,6 +30,10 @@ export const ballot = pgTable(
   "ballot",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    // Not a FK to user.id: Better Auth owns that table via its own generated
+    // schema (src/db/auth-schema.ts), and referencing it here would create a
+    // circular import between the two schema files. Referential integrity for
+    // this column is enforced by the caller (castVote), not the database.
     studentId: text("student_id").notNull(),
     electionId: uuid("election_id").notNull().references(() => election.id),
     positionId: uuid("position_id").notNull().references(() => position.id),
