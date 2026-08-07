@@ -13,7 +13,7 @@ This is a **final-year university project, not a startup**. Keep implementation 
 - **PostgreSQL (via Neon)** — database
 - **Drizzle ORM** — database schema + queries
 - **Better Auth** — authentication (matric number + password, no social login needed)
-- **Brevo** — email, password reset only (no OTP signup, no notifications needed)
+- **Resend** — email, password reset only (no OTP signup, no notifications needed)
 
 ## Modules
 

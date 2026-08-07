@@ -1,4 +1,8 @@
+import { Resend } from "resend";
+
 type AccountEmailMode = "invite" | "reset";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendAccountEmail({
   to,
@@ -15,21 +19,14 @@ export async function sendAccountEmail({
       ? "An account has been created for you. Click below to set your password and get started."
       : "Click below to reset your password.";
 
-  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: {
-      "api-key": process.env.BREVO_API_KEY!,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      sender: { email: process.env.BREVO_SENDER_EMAIL!, name: "University Elections" },
-      to: [{ email: to }],
-      subject,
-      htmlContent: `<p>${intro}</p><p><a href="${url}">${subject}</a></p>`,
-    }),
+  const { error } = await resend.emails.send({
+    from: process.env.RESEND_SENDER_EMAIL!,
+    to: [to],
+    subject,
+    html: `<p>${intro}</p><p><a href="${url}">${subject}</a></p>`,
   });
 
-  if (!response.ok) {
-    throw new Error(`Brevo send failed: ${response.status} ${await response.text()}`);
+  if (error) {
+    throw new Error(`Resend send failed: ${error.message}`);
   }
 }
