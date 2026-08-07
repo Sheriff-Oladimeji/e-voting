@@ -13,7 +13,13 @@ export const auth = betterAuth({
       await sendAccountEmail({ to: user.email, url, mode: "reset" });
     },
   },
-  plugins: [username()],
+  plugins: [
+    username({
+      // Matric numbers look like "2022/409799" — Better Auth's default validator
+      // (letters/digits/underscore/dot only) rejects the "/" separator.
+      usernameValidator: (username) => /^[a-zA-Z0-9/_.-]+$/.test(username),
+    }),
+  ],
   user: {
     additionalFields: {
       role: { type: "string", required: true, defaultValue: "student" },

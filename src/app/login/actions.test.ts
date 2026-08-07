@@ -12,10 +12,10 @@ afterEach(() => {
 });
 
 describe("signIn action", () => {
-  it("returns success on valid credentials", async () => {
-    vi.mocked(auth.api.signInUsername).mockResolvedValue({ user: { id: "1" } } as never);
+  it("returns success and the user's role on valid credentials", async () => {
+    vi.mocked(auth.api.signInUsername).mockResolvedValue({ user: { id: "1", role: "admin" } } as never);
     const result = await signIn({ username: "u1", password: "p1" });
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, role: "admin" });
   });
 
   it("returns a friendly error on invalid credentials", async () => {

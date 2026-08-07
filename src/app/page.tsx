@@ -1,65 +1,108 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ShieldCheck, CheckCircle2, LayoutDashboard, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const reasons = [
+  {
+    icon: ShieldCheck,
+    title: "One vote per position",
+    description: "Enforced by a database constraint, not just app logic — no double-counted or duplicate votes.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Instant confirmation",
+    description: "Every vote returns an explicit confirmation and reference code the moment it's cast.",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "One dashboard for admins",
+    description: "Candidates, elections, and results are managed from a single place — no spreadsheets.",
+  },
+];
+
+const candidates = [
+  { name: "Amara Chukwu", selected: true },
+  { name: "Tariq Bello", selected: false },
+  { name: "Ifeoma Obi", selected: false },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="flex flex-1 flex-col">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
+        <span className="text-sm font-medium tracking-tight">Student Elections</span>
+        <Button render={<Link href="/login" />} variant="outline" size="sm">
+          Sign in
+        </Button>
+      </header>
+
+      <section className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-16 px-6 py-12 md:grid-cols-2 md:py-20">
+        <div className="flex flex-col gap-6">
+          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+            University Electronic Voting System
+          </span>
+          <h1 className="max-w-md text-5xl leading-[1.05] font-semibold tracking-tighter text-balance md:text-6xl">
+            Vote securely. See it confirmed instantly.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-sm text-base leading-relaxed text-muted-foreground">
+            The official platform for university student elections — cast your vote in seconds, or manage an
+            election from one dashboard.
           </p>
+          <div>
+            <Button render={<Link href="/login" />} size="lg" className="h-11 bg-emerald-600 px-8 text-base text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400">
+              Sign in
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="relative">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)]">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Student Union President</p>
+            <div className="mt-4 flex flex-col divide-y divide-border">
+              {candidates.map(({ name, selected }) => (
+                <div key={name} className="flex items-center justify-between py-3">
+                  <span className="text-sm font-medium">{name}</span>
+                  <span
+                    className={
+                      selected
+                        ? "flex size-5 items-center justify-center rounded-full bg-emerald-600 dark:bg-emerald-500"
+                        : "size-5 rounded-full border border-border"
+                    }
+                  >
+                    {selected && <Check className="size-3.5 text-white" strokeWidth={3} aria-hidden="true" />}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="absolute -bottom-4 -left-4 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-[0_10px_25px_-10px_rgba(0,0,0,0.2)] sm:-left-8">
+            <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            <span className="text-xs font-medium">Vote recorded — Ref #A82F19</span>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="border-t border-border">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:py-20">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-balance">Built for how elections actually work</h2>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              Every rule below is enforced by the system, not left to trust.
+            </p>
+          </div>
+          <div className="flex flex-col divide-y divide-border">
+            {reasons.map(({ icon: Icon, title, description }) => (
+              <div key={title} className="flex items-start gap-4 py-6 first:pt-0">
+                <Icon className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                <div>
+                  <h3 className="font-medium">{title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

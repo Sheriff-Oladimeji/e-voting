@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { AlertCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { signIn } from "./actions";
 
 export default function LoginPage() {
@@ -22,35 +25,79 @@ export default function LoginPage() {
       setError(result.error);
       return;
     }
-    router.push("/");
+    router.push(result.role === "admin" ? "/admin" : "/dashboard");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto mt-24 flex max-w-sm flex-col gap-4">
-      <h1 className="text-xl font-semibold">Sign in</h1>
-      <label className="flex flex-col gap-1">
-        Matric Number
-        <input
-          className="rounded border px-3 py-2"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        Password
-        <input
-          type="password"
-          className="rounded border px-3 py-2"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button type="submit" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
-      </Button>
-    </form>
+    <main className="flex flex-1 flex-col md:grid md:grid-cols-2">
+      <div className="hidden flex-col justify-between bg-zinc-950 p-10 text-zinc-50 md:flex">
+        <Link href="/" className="text-sm font-medium tracking-tight">
+          Student Elections
+        </Link>
+        <div className="flex flex-col gap-4">
+          <ShieldCheck className="size-8 text-emerald-400" aria-hidden="true" />
+          <p className="max-w-xs text-2xl leading-snug font-medium tracking-tight text-balance">
+            One vote per position, enforced by the database — not just the app.
+          </p>
+        </div>
+        <p className="text-xs text-zinc-500">University Electronic Voting System</p>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+            <p className="text-sm text-muted-foreground">Use your matric number and password.</p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username" className="text-sm font-medium">
+              Matric Number
+            </label>
+            <Input
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              aria-invalid={!!error}
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              aria-invalid={!!error}
+              required
+            />
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            disabled={pending}
+            className="h-10 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+          >
+            {pending ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+      </div>
+    </main>
   );
 }

@@ -72,8 +72,8 @@ SEED_ADMIN_PASSWORD=some-strong-password
 ## 3. Create the database tables
 
 ```bash
-npm run db:generate   # generates SQL migration files from the schema
-npm run db:push       # applies them to your Neon database
+npm run db:generate   # generates SQL migration files from the schema, into ./drizzle
+npm run db:migrate    # applies pending migration files to your Neon database
 ```
 
 ## 4. Create your admin account
