@@ -2,8 +2,12 @@ import { describe, it, expect } from "vitest";
 import { resolveRouteAccess } from "./route-access";
 
 describe("resolveRouteAccess", () => {
-  it("redirects to login when there is no session on a protected route", () => {
-    expect(resolveRouteAccess("/admin", null)).toBe("redirect-login");
+  it("redirects to the admin login when there is no session on an admin route", () => {
+    expect(resolveRouteAccess("/admin", null)).toBe("redirect-admin-login");
+  });
+
+  it("redirects to the student login when there is no session on a student route", () => {
+    expect(resolveRouteAccess("/dashboard", null)).toBe("redirect-login");
   });
 
   it("allows an admin onto /admin", () => {
@@ -20,6 +24,10 @@ describe("resolveRouteAccess", () => {
 
   it("forbids an admin on /dashboard", () => {
     expect(resolveRouteAccess("/dashboard", { role: "admin" })).toBe("forbidden");
+  });
+
+  it("allows unauthenticated access to /admin/login itself", () => {
+    expect(resolveRouteAccess("/admin/login", null)).toBe("allow");
   });
 
   it("allows unauthenticated access to unprotected routes", () => {

@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, ShieldCheck } from "lucide-react";
+import { AlertCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signIn } from "@/lib/auth-actions";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +25,11 @@ export default function LoginPage() {
       setError(result.error);
       return;
     }
-    router.push(result.role === "admin" ? "/admin" : "/dashboard");
+    if (result.role !== "admin") {
+      setError("This account isn't an admin account. Use the student sign-in page instead.");
+      return;
+    }
+    router.push("/admin");
   }
 
   return (
@@ -35,24 +39,24 @@ export default function LoginPage() {
           Student Elections
         </Link>
         <div className="flex flex-col gap-4">
-          <ShieldCheck className="size-8 text-emerald-400" aria-hidden="true" />
+          <LayoutDashboard className="size-8 text-emerald-400" aria-hidden="true" />
           <p className="max-w-xs text-2xl leading-snug font-medium tracking-tight text-balance">
-            One vote per position, enforced by the database — not just the app.
+            Manage candidates, elections, and results from one dashboard.
           </p>
         </div>
-        <p className="text-xs text-zinc-500">University Electronic Voting System</p>
+        <p className="text-xs text-zinc-500">University Electronic Voting System — Admin</p>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
         <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-            <p className="text-sm text-muted-foreground">Use your matric number and password.</p>
+            <h1 className="text-2xl font-semibold tracking-tight">Admin sign in</h1>
+            <p className="text-sm text-muted-foreground">Use your admin username and password.</p>
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="username" className="text-sm font-medium">
-              Matric Number
+              Username
             </label>
             <Input
               id="username"
@@ -98,8 +102,8 @@ export default function LoginPage() {
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Signing in as an admin?{" "}
-            <Link href="/admin/login" className="font-medium text-foreground underline underline-offset-2">
+            Signing in as a student?{" "}
+            <Link href="/login" className="font-medium text-foreground underline underline-offset-2">
               Sign in here
             </Link>
           </p>

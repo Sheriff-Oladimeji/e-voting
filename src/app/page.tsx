@@ -31,9 +31,14 @@ export default function Home() {
     <main className="flex flex-1 flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <span className="text-sm font-medium tracking-tight">Student Elections</span>
-        <Button render={<Link href="/login" />} variant="outline" size="sm">
-          Sign in
-        </Button>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-foreground">
+            Admin sign in
+          </Link>
+          <Button render={<Link href="/login" />} variant="outline" size="sm">
+            Sign in
+          </Button>
+        </div>
       </header>
 
       <section className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-16 px-6 py-12 md:grid-cols-2 md:py-20">
