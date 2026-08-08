@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,18 +9,36 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
-import { createElectionAction } from "./actions";
+import { updateElectionAction } from "./actions";
 
 const ANY_FACULTY = "__any__";
 
-export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
+function toDatetimeLocal(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function EditElectionForm({
+  electionId,
+  initial,
+  onSaved,
+}: {
+  electionId: string;
+  initial: {
+    title: string;
+    startAt: Date;
+    endAt: Date;
+    eligibleFaculties: string[] | null;
+    eligibleDepartments: string[] | null;
+  };
+  onSaved: () => void;
+}) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [startAt, setStartAt] = useState("");
-  const [endAt, setEndAt] = useState("");
-  const [positionTitles, setPositionTitles] = useState<string[]>([""]);
-  const [faculty, setFaculty] = useState(ANY_FACULTY);
-  const [departments, setDepartments] = useState<string[]>([]);
+  const [title, setTitle] = useState(initial.title);
+  const [startAt, setStartAt] = useState(toDatetimeLocal(initial.startAt));
+  const [endAt, setEndAt] = useState(toDatetimeLocal(initial.endAt));
+  const [faculty, setFaculty] = useState(initial.eligibleFaculties?.[0] ?? ANY_FACULTY);
+  const [departments, setDepartments] = useState<string[]>(initial.eligibleDepartments ?? []);
   const [pending, setPending] = useState(false);
 
   const availableDepartments = faculty === ANY_FACULTY ? [] : departmentsForFaculty(faculty);
@@ -29,31 +46,30 @@ export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    await createElectionAction({
+    await updateElectionAction(electionId, {
       title,
       startAt,
       endAt,
-      positionTitles,
       eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
       eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
     });
     setPending(false);
     router.refresh();
-    onCreated();
+    onSaved();
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="title">Title</Label>
-        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <Label htmlFor="edit-title">Title</Label>
+        <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="startAt">Starts</Label>
+          <Label htmlFor="edit-startAt">Starts</Label>
           <Input
-            id="startAt"
+            id="edit-startAt"
             type="datetime-local"
             value={startAt}
             onChange={(e) => setStartAt(e.target.value)}
@@ -61,50 +77,20 @@ export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="endAt">Ends</Label>
-          <Input id="endAt" type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
+          <Label htmlFor="edit-endAt">Ends</Label>
+          <Input
+            id="edit-endAt"
+            type="datetime-local"
+            value={endAt}
+            onChange={(e) => setEndAt(e.target.value)}
+            required
+          />
         </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>Positions</Label>
-        {positionTitles.map((value, i) => (
-          <div key={i} className="flex gap-2">
-            <Input
-              value={value}
-              onChange={(e) =>
-                setPositionTitles((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))
-              }
-              placeholder="e.g. President"
-              required
-            />
-            {positionTitles.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setPositionTitles((prev) => prev.filter((_, idx) => idx !== i))}
-                aria-label="Remove position"
-              >
-                <X className="size-4" />
-              </Button>
-            )}
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="self-start"
-          onClick={() => setPositionTitles((prev) => [...prev, ""])}
-        >
-          <Plus className="size-4" /> Add position
-        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="faculty">
+          <Label htmlFor="edit-faculty">
             Eligible faculty <span className="font-normal text-muted-foreground">(blank = everyone)</span>
           </Label>
           <Select
@@ -114,7 +100,7 @@ export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
               setDepartments([]);
             }}
           >
-            <SelectTrigger id="faculty" className="w-full">
+            <SelectTrigger id="edit-faculty" className="w-full">
               <SelectValue placeholder="Any faculty" />
             </SelectTrigger>
             <SelectContent>
@@ -130,8 +116,7 @@ export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
 
         <div className="flex flex-col gap-2">
           <Label>
-            Eligible departments{" "}
-            <span className="font-normal text-muted-foreground">(blank = whole faculty)</span>
+            Eligible departments <span className="font-normal text-muted-foreground">(blank = whole faculty)</span>
           </Label>
           {faculty === ANY_FACULTY ? (
             <p className="flex h-9 items-center text-sm text-muted-foreground">Pick a faculty first</p>
@@ -160,7 +145,7 @@ export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
         disabled={pending}
         className="self-start bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400"
       >
-        {pending ? "Creating…" : "Create election"}
+        {pending ? "Saving…" : "Save changes"}
       </Button>
     </form>
   );

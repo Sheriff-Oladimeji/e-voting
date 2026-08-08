@@ -1,8 +1,10 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { election, position } from "@/db/schema";
-import { createElection, getElection, listPositionsForElection, updateElectionStatus } from "./elections";
+import { election, position, candidate, vote } from "@/db/schema";
+import { createElection, getElection, listPositionsForElection, updateElectionStatus, updateElection, deleteElection } from "./elections";
+import { addCandidate } from "./candidates";
+import { castVote } from "./votes";
 
 let createdElectionId: string | null = null;
 
@@ -65,5 +67,61 @@ describe("updateElectionStatus", () => {
     await updateElectionStatus(created.id, "active");
     const updated = await getElection(created.id);
     expect(updated?.status).toBe("active");
+  });
+});
+
+describe("updateElection", () => {
+  it("updates title, window, and eligibility", async () => {
+    const created = await createElection({
+      title: "Original Title",
+      startAt: new Date(),
+      endAt: new Date(Date.now() + 1000 * 60 * 60),
+      positionTitles: ["President"],
+      eligibleFaculties: [],
+      eligibleDepartments: [],
+    });
+    createdElectionId = created.id;
+
+    const newStart = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    const newEnd = new Date(Date.now() + 1000 * 60 * 60 * 48);
+    await updateElection(created.id, {
+      title: "Renamed Election",
+      startAt: newStart,
+      endAt: newEnd,
+      eligibleFaculties: ["Faculty of Engineering"],
+      eligibleDepartments: ["Civil Engineering"],
+    });
+
+    const updated = await getElection(created.id);
+    expect(updated?.title).toBe("Renamed Election");
+    expect(updated?.eligibleFaculties).toEqual(["Faculty of Engineering"]);
+    expect(updated?.eligibleDepartments).toEqual(["Civil Engineering"]);
+  });
+});
+
+describe("deleteElection", () => {
+  it("cascades through positions, candidates, votes, and ballots", async () => {
+    const created = await createElection({
+      title: "Delete Test Election",
+      startAt: new Date(Date.now() - 1000),
+      endAt: new Date(Date.now() + 1000 * 60 * 60),
+      positionTitles: ["President"],
+      eligibleFaculties: [],
+      eligibleDepartments: [],
+    });
+    await updateElectionStatus(created.id, "active");
+    const positions = await listPositionsForElection(created.id);
+    const pos = positions[0];
+    const cand = await addCandidate({ positionId: pos.id, name: "Delete Test Candidate" });
+    await castVote({ studentId: "delete-test-student", electionId: created.id, positionId: pos.id, candidateId: cand.id });
+
+    await deleteElection(created.id);
+
+    expect(await getElection(created.id)).toBeNull();
+    expect(await db.select().from(position).where(eq(position.id, pos.id))).toHaveLength(0);
+    expect(await db.select().from(candidate).where(eq(candidate.id, cand.id))).toHaveLength(0);
+    expect(await db.select().from(vote).where(eq(vote.candidateId, cand.id))).toHaveLength(0);
+
+    createdElectionId = null; // already deleted — nothing for afterEach to clean up
   });
 });

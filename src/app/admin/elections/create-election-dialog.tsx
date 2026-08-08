@@ -25,7 +25,7 @@ export function CreateElectionDialog() {
           </Button>
         }
       />
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] w-[70vw] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create election</DialogTitle>
           <DialogDescription>Set the title, window, positions, and who&apos;s eligible to vote.</DialogDescription>

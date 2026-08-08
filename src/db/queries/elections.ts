@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { election, position, type electionStatusEnum } from "@/db/schema";
+import { election, position, candidate, vote, ballot, type electionStatusEnum } from "@/db/schema";
 
 type ElectionStatus = (typeof electionStatusEnum.enumValues)[number];
 
@@ -54,4 +54,39 @@ export async function listPositionsForElection(electionId: string) {
 
 export async function updateElectionStatus(electionId: string, status: ElectionStatus) {
   await db.update(election).set({ status }).where(eq(election.id, electionId));
+}
+
+export async function updateElection(
+  electionId: string,
+  input: {
+    title: string;
+    startAt: Date;
+    endAt: Date;
+    eligibleFaculties?: string[];
+    eligibleDepartments?: string[];
+  }
+) {
+  await db
+    .update(election)
+    .set({
+      title: input.title,
+      startAt: input.startAt,
+      endAt: input.endAt,
+      eligibleFaculties: input.eligibleFaculties?.length ? input.eligibleFaculties : null,
+      eligibleDepartments: input.eligibleDepartments?.length ? input.eligibleDepartments : null,
+    })
+    .where(eq(election.id, electionId));
+}
+
+export async function deleteElection(electionId: string) {
+  const positions = await db.select({ id: position.id }).from(position).where(eq(position.electionId, electionId));
+  const positionIds = positions.map((p) => p.id);
+
+  if (positionIds.length > 0) {
+    await db.delete(vote).where(inArray(vote.positionId, positionIds));
+    await db.delete(candidate).where(inArray(candidate.positionId, positionIds));
+  }
+  await db.delete(ballot).where(eq(ballot.electionId, electionId));
+  await db.delete(position).where(eq(position.electionId, electionId));
+  await db.delete(election).where(eq(election.id, electionId));
 }

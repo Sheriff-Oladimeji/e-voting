@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { CreateElectionDialog } from "./create-election-dialog";
+import { EditElectionDialog } from "./edit-election-dialog";
+import { DeleteElectionButton } from "./delete-election-button";
 import { ElectionStatusControl } from "./election-status-control";
 
 const statusBadgeClass = {
@@ -59,7 +61,20 @@ export default async function ElectionsPage() {
                       {new Date(e.startAt).toLocaleDateString()} – {new Date(e.endAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <ElectionStatusControl electionId={e.id} status={e.status} />
+                      <div className="flex items-center justify-end gap-1">
+                        <ElectionStatusControl electionId={e.id} status={e.status} />
+                        <EditElectionDialog
+                          electionId={e.id}
+                          initial={{
+                            title: e.title,
+                            startAt: new Date(e.startAt),
+                            endAt: new Date(e.endAt),
+                            eligibleFaculties: e.eligibleFaculties,
+                            eligibleDepartments: e.eligibleDepartments,
+                          }}
+                        />
+                        <DeleteElectionButton electionId={e.id} title={e.title} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
