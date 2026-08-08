@@ -25,16 +25,7 @@ export function CsvImportForm() {
 
   return (
     <div>
-      <p className="text-sm text-muted-foreground">
-        CSV with columns: <code className="rounded bg-muted px-1 py-0.5">matric_number</code>,{" "}
-        <code className="rounded bg-muted px-1 py-0.5">name</code>,{" "}
-        <code className="rounded bg-muted px-1 py-0.5">email</code>,{" "}
-        <code className="rounded bg-muted px-1 py-0.5">faculty</code>,{" "}
-        <code className="rounded bg-muted px-1 py-0.5">department</code>. Each new student gets an email to set
-        their password. Re-uploading the same file skips students who already exist.
-      </p>
-
-      <label className="mt-6 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border px-6 py-10 text-center hover:bg-muted/50">
+      <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-border px-6 py-10 text-center hover:bg-muted/50">
         <UploadCloud className="size-6 text-muted-foreground" aria-hidden="true" />
         <span className="text-sm font-medium">{fileName ?? "Choose a CSV file"}</span>
         <input

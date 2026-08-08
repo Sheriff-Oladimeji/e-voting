@@ -24,7 +24,7 @@ function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!token) return;
     setPending(true);

@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { createElectionAction } from "./actions";
 
-export function CreateElectionForm() {
+export function CreateElectionForm({ onCreated }: { onCreated: () => void }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [startAt, setStartAt] = useState("");
@@ -17,7 +18,7 @@ export function CreateElectionForm() {
   const [eligibleDepartments, setEligibleDepartments] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     await createElectionAction({
@@ -29,31 +30,20 @@ export function CreateElectionForm() {
       eligibleDepartments: eligibleDepartments.split(",").map((s) => s.trim()),
     });
     setPending(false);
-    setTitle("");
-    setStartAt("");
-    setEndAt("");
-    setPositionTitles([""]);
-    setEligibleFaculties("");
-    setEligibleDepartments("");
     router.refresh();
+    onCreated();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-lg border border-border p-6">
-      <h2 className="font-medium">Create election</h2>
-
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <label htmlFor="title" className="text-sm font-medium">
-          Title
-        </label>
+        <Label htmlFor="title">Title</Label>
         <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <label htmlFor="startAt" className="text-sm font-medium">
-            Starts
-          </label>
+          <Label htmlFor="startAt">Starts</Label>
           <Input
             id="startAt"
             type="datetime-local"
@@ -63,15 +53,13 @@ export function CreateElectionForm() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="endAt" className="text-sm font-medium">
-            Ends
-          </label>
+          <Label htmlFor="endAt">Ends</Label>
           <Input id="endAt" type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Positions</span>
+        <Label>Positions</Label>
         {positionTitles.map((value, i) => (
           <div key={i} className="flex gap-2">
             <Input
@@ -107,9 +95,9 @@ export function CreateElectionForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="eligibleFaculties" className="text-sm font-medium">
+        <Label htmlFor="eligibleFaculties">
           Eligible faculties <span className="font-normal text-muted-foreground">(comma-separated, blank = everyone)</span>
-        </label>
+        </Label>
         <Input
           id="eligibleFaculties"
           value={eligibleFaculties}
@@ -119,9 +107,9 @@ export function CreateElectionForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="eligibleDepartments" className="text-sm font-medium">
+        <Label htmlFor="eligibleDepartments">
           Eligible departments <span className="font-normal text-muted-foreground">(comma-separated, blank = everyone)</span>
-        </label>
+        </Label>
         <Input
           id="eligibleDepartments"
           value={eligibleDepartments}

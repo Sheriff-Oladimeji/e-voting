@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Trophy } from "lucide-react";
 import { getElection } from "@/db/queries/elections";
 import { getVoteTallyForElection, getTurnoutForElection } from "@/db/queries/results";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PrintButton } from "./print-button";
 
 export default async function ElectionResultsPage({
@@ -28,7 +31,7 @@ export default async function ElectionResultsPage({
   }));
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12 print:px-0 print:py-0">
+    <div className="mx-auto max-w-5xl px-6 py-12 print:px-0 print:py-0">
       <div className="flex items-center justify-between print:hidden">
         <Link href={`/admin/elections/${electionId}`} className="text-sm text-muted-foreground hover:underline">
           ← {election.title}
@@ -43,22 +46,32 @@ export default async function ElectionResultsPage({
 
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">{election.title} — Results</h1>
 
-      <div className="mt-8 flex flex-col gap-8">
+      <div className="mt-8 grid gap-6 md:grid-cols-2">
         {positions.map((p) => (
-          <div key={p.positionId}>
-            <h2 className="font-medium">{p.positionTitle}</h2>
-            <div className="mt-3 flex flex-col divide-y divide-border rounded-lg border border-border">
-              {p.candidates.map((c, i) => (
-                <div key={c.candidateId} className="flex items-center justify-between gap-4 p-4">
-                  <span className="text-sm font-medium">
-                    {i === 0 && c.voteCount > 0 && "🏆 "}
-                    {c.candidateName}
-                  </span>
-                  <span className="font-mono text-sm">{c.voteCount} votes</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card key={p.positionId} className="py-0">
+            <CardHeader className="pt-6">
+              <CardTitle>{p.positionTitle}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableBody>
+                  {p.candidates.map((c, i) => (
+                    <TableRow key={c.candidateId}>
+                      <TableCell className="font-medium">
+                        <span className="flex items-center gap-2">
+                          {i === 0 && c.voteCount > 0 && (
+                            <Trophy className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                          )}
+                          {c.candidateName}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right font-mono">{c.voteCount} votes</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -70,33 +83,45 @@ export default async function ElectionResultsPage({
             {turnout.totalEligible > 0 ? Math.round((turnout.totalVoted / turnout.totalEligible) * 100) : 0}%)
           </p>
 
-          <div className="mt-4 grid gap-6 sm:grid-cols-2">
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">By faculty</h3>
-              <div className="mt-2 flex flex-col divide-y divide-border rounded-lg border border-border">
-                {turnout.byFaculty.map((row) => (
-                  <div key={row.label} className="flex items-center justify-between p-3 text-sm">
-                    <span>{row.label}</span>
-                    <span className="font-mono">
-                      {row.voted}/{row.eligible}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">By department</h3>
-              <div className="mt-2 flex flex-col divide-y divide-border rounded-lg border border-border">
-                {turnout.byDepartment.map((row) => (
-                  <div key={row.label} className="flex items-center justify-between p-3 text-sm">
-                    <span>{row.label}</span>
-                    <span className="font-mono">
-                      {row.voted}/{row.eligible}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="mt-4 grid gap-6 md:grid-cols-2">
+            <Card className="py-0">
+              <CardHeader className="pt-6">
+                <CardTitle className="text-sm text-muted-foreground">By faculty</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableBody>
+                    {turnout.byFaculty.map((row) => (
+                      <TableRow key={row.label}>
+                        <TableCell>{row.label}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {row.voted}/{row.eligible}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+            <Card className="py-0">
+              <CardHeader className="pt-6">
+                <CardTitle className="text-sm text-muted-foreground">By department</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableBody>
+                    {turnout.byDepartment.map((row) => (
+                      <TableRow key={row.label}>
+                        <TableCell>{row.label}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {row.voted}/{row.eligible}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}

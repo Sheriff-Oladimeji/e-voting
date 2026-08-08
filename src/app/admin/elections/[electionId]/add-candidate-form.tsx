@@ -4,9 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { addCandidateAction } from "./actions";
 
-export function AddCandidateForm({ electionId, positionId }: { electionId: string; positionId: string }) {
+export function AddCandidateForm({
+  electionId,
+  positionId,
+  onAdded,
+}: {
+  electionId: string;
+  positionId: string;
+  onAdded: () => void;
+}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
@@ -15,37 +25,49 @@ export function AddCandidateForm({ electionId, positionId }: { electionId: strin
   const [department, setDepartment] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     await addCandidateAction(electionId, { positionId, name, photoUrl, manifesto, faculty, department });
     setPending(false);
-    setName("");
-    setPhotoUrl("");
-    setManifesto("");
-    setFaculty("");
-    setDepartment("");
     router.refresh();
+    onAdded();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-md bg-muted/50 p-4">
-      <div className="grid grid-cols-2 gap-3">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Candidate name" required />
-        <Input value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="Photo URL (optional)" />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={`name-${positionId}`}>Name</Label>
+        <Input id={`name-${positionId}`} value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Input value={faculty} onChange={(e) => setFaculty(e.target.value)} placeholder="Faculty (optional)" />
-        <Input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Department (optional)" />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={`faculty-${positionId}`}>Faculty</Label>
+          <Input id={`faculty-${positionId}`} value={faculty} onChange={(e) => setFaculty(e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={`department-${positionId}`}>Department</Label>
+          <Input id={`department-${positionId}`} value={department} onChange={(e) => setDepartment(e.target.value)} />
+        </div>
       </div>
-      <textarea
-        value={manifesto}
-        onChange={(e) => setManifesto(e.target.value)}
-        placeholder="Manifesto (optional)"
-        rows={2}
-        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-      />
-      <Button type="submit" size="sm" disabled={pending} className="self-start">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={`photo-${positionId}`}>Photo URL</Label>
+        <Input id={`photo-${positionId}`} value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={`manifesto-${positionId}`}>Manifesto</Label>
+        <Textarea
+          id={`manifesto-${positionId}`}
+          value={manifesto}
+          onChange={(e) => setManifesto(e.target.value)}
+          rows={3}
+        />
+      </div>
+      <Button
+        type="submit"
+        disabled={pending}
+        className="self-start bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+      >
         {pending ? "Adding…" : "Add candidate"}
       </Button>
     </form>

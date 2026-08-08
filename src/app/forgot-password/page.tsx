@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     await requestPasswordResetAction(email);
