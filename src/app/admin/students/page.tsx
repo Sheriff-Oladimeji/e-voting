@@ -8,7 +8,7 @@ export default async function StudentsPage() {
   const students = await listStudents();
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="mx-auto max-w-[1600px] px-6 py-12">
       <Link href="/admin" className="text-sm text-muted-foreground hover:underline">
         ← Admin
       </Link>

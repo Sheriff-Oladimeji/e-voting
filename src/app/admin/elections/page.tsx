@@ -18,7 +18,7 @@ export default async function ElectionsPage() {
   const elections = await listElections();
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="mx-auto max-w-[1600px] px-6 py-12">
       <Link href="/admin" className="text-sm text-muted-foreground hover:underline">
         ← Admin
       </Link>

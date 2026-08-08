@@ -88,57 +88,52 @@ export function EditElectionForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-faculty">
-            Eligible faculty <span className="font-normal text-muted-foreground">(blank = everyone)</span>
-          </Label>
-          <Select
-            value={faculty}
-            onValueChange={(value) => {
-              setFaculty(value ?? ANY_FACULTY);
-              setDepartments([]);
-            }}
-          >
-            <SelectTrigger id="edit-faculty" className="w-full">
-              <SelectValue placeholder="Any faculty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ANY_FACULTY}>Any faculty</SelectItem>
-              {FACULTIES.map((f) => (
-                <SelectItem key={f.name} value={f.name}>
-                  {f.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="edit-faculty">Eligible faculty</Label>
+        <Select
+          value={faculty}
+          onValueChange={(value) => {
+            setFaculty(value ?? ANY_FACULTY);
+            setDepartments([]);
+          }}
+        >
+          <SelectTrigger id="edit-faculty" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ANY_FACULTY}>All faculties</SelectItem>
+            {FACULTIES.map((f) => (
+              <SelectItem key={f.name} value={f.name}>
+                {f.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
+      {faculty !== ANY_FACULTY && (
         <div className="flex flex-col gap-2">
           <Label>
-            Eligible departments <span className="font-normal text-muted-foreground">(blank = whole faculty)</span>
+            Eligible departments{" "}
+            <span className="font-normal text-muted-foreground">(none checked = whole faculty)</span>
           </Label>
-          {faculty === ANY_FACULTY ? (
-            <p className="flex h-9 items-center text-sm text-muted-foreground">Pick a faculty first</p>
-          ) : (
-            <ScrollArea className="h-32 rounded-lg border border-input">
-              <div className="flex flex-col gap-2 p-3">
-                {availableDepartments.map((dept) => (
-                  <label key={dept} className="flex items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={departments.includes(dept)}
-                      onCheckedChange={(checked) =>
-                        setDepartments((prev) => (checked ? [...prev, dept] : prev.filter((d) => d !== dept)))
-                      }
-                    />
-                    {dept}
-                  </label>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
+          <ScrollArea className="h-32 rounded-lg border border-input">
+            <div className="flex flex-col gap-2 p-3">
+              {availableDepartments.map((dept) => (
+                <label key={dept} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={departments.includes(dept)}
+                    onCheckedChange={(checked) =>
+                      setDepartments((prev) => (checked ? [...prev, dept] : prev.filter((d) => d !== dept)))
+                    }
+                  />
+                  {dept}
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
-      </div>
+      )}
 
       <Button
         type="submit"
