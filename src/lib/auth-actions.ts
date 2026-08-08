@@ -45,3 +45,31 @@ export async function signOutAction() {
   await auth.api.signOut({ headers: await headers() });
   redirect("/");
 }
+
+export async function requestPasswordResetAction(email: string): Promise<void> {
+  try {
+    await auth.api.requestPasswordReset({ body: { email, redirectTo: "/reset-password" } });
+  } catch (err) {
+    // Deliberately swallowed: Better Auth already returns the same generic
+    // "if this email exists" response whether or not the account is real, to
+    // avoid leaking which emails are registered. Do the same here — never
+    // surface a distinct error for "email not found" vs. a real failure.
+    console.error("requestPasswordReset failed:", err);
+  }
+}
+
+export async function resetPasswordAction(
+  token: string,
+  newPassword: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    await auth.api.resetPassword({ body: { newPassword, token } });
+    return { success: true };
+  } catch (err) {
+    if (err instanceof APIError) {
+      return { success: false, error: err.message };
+    }
+    console.error("resetPassword failed:", err);
+    return { success: false, error: "Something went wrong. Please try again." };
+  }
+}

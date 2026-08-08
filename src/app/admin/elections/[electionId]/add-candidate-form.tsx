@@ -15,7 +15,7 @@ export function AddCandidateForm({ electionId, positionId }: { electionId: strin
   const [department, setDepartment] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     await addCandidateAction(electionId, { positionId, name, photoUrl, manifesto, faculty, department });

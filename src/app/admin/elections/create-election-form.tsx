@@ -17,7 +17,7 @@ export function CreateElectionForm() {
   const [eligibleDepartments, setEligibleDepartments] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     await createElectionAction({

@@ -2,9 +2,9 @@ import { describe, it, expect, afterEach } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/auth-schema";
-import { importStudents } from "./students";
+import { importStudents, listStudents, updateStudent, removeStudent } from "./students";
 
-const testUsernames = ["test-import-2022/900001", "test-import-2022/900002"];
+const testUsernames = ["test-import-2022/900001", "test-import-2022/900002", "test-import-2022/900004"];
 
 afterEach(async () => {
   for (const username of testUsernames) {
@@ -52,5 +52,33 @@ describe("importStudents", () => {
     const outcome = await importStudents([{ matric_number: "2022/900003", name: "No Email" }]);
     expect(outcome.errors).toHaveLength(1);
     expect(outcome.errors[0].reason).toMatch(/missing/i);
+  });
+});
+
+describe("listStudents / updateStudent / removeStudent", () => {
+  it("lists only role=student users, updates their fields, and removes them", async () => {
+    await importStudents([
+      {
+        matric_number: testUsernames[2],
+        name: "Ifeoma Obi",
+        email: "ifeoma-import-test@example.com",
+        faculty: "Sciences",
+      },
+    ]);
+
+    const listed = await listStudents();
+    const found = listed.find((s) => s.username === testUsernames[2]);
+    expect(found).toBeDefined();
+    expect(found!.role).toBe("student");
+
+    await updateStudent(found!.id, { name: "Ifeoma O. Chukwu", faculty: "Engineering", department: "Civil Engineering" });
+    const [updated] = await db.select().from(user).where(eq(user.id, found!.id));
+    expect(updated.name).toBe("Ifeoma O. Chukwu");
+    expect(updated.faculty).toBe("Engineering");
+    expect(updated.department).toBe("Civil Engineering");
+
+    await removeStudent(found!.id);
+    const afterRemoval = await db.select().from(user).where(eq(user.id, found!.id));
+    expect(afterRemoval).toHaveLength(0);
   });
 });

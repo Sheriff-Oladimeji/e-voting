@@ -12,7 +12,9 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     // Neon's free tier suspends its compute when idle; the first query after
     // a suspend can take several seconds to wake it, well past Vitest's 5s
-    // default — these tests hit the real database, not a mock.
-    testTimeout: 15000,
+    // default — these tests hit the real database, not a mock. Tests that
+    // chain several signups/imports in one case do many sequential round
+    // trips, so this needs real headroom, not just cold-start margin.
+    testTimeout: 30000,
   },
 });

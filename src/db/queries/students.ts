@@ -67,3 +67,30 @@ export async function importStudents(rows: StudentImportRow[]): Promise<StudentI
 
   return result;
 }
+
+export async function listStudents() {
+  return db.select().from(user).where(eq(user.role, "student")).orderBy(user.username);
+}
+
+export async function updateStudent(
+  userId: string,
+  input: { name: string; faculty: string; department: string }
+) {
+  await db
+    .update(user)
+    .set({ name: input.name, faculty: input.faculty || null, department: input.department || null })
+    .where(eq(user.id, userId));
+}
+
+export async function removeStudent(userId: string) {
+  // Ballot rows for this student are intentionally left alone — votes already
+  // cast must persist even if the account is later removed, and ballot.studentId
+  // has no FK to user.id (see src/db/schema.ts) so no cascade would touch them anyway.
+  await db.delete(user).where(eq(user.id, userId));
+}
+
+export async function resendInvite(userId: string) {
+  const [student] = await db.select().from(user).where(eq(user.id, userId));
+  if (!student) throw new Error("Student not found");
+  await auth.api.requestPasswordReset({ body: { email: student.email } });
+}
