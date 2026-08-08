@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as authSchema from "@/db/auth-schema";
 import { sendAccountEmail } from "./email";
+import { isValidUsername } from "./username-format";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
@@ -16,9 +17,7 @@ export const auth = betterAuth({
   },
   plugins: [
     username({
-      // Matric numbers look like "2022/409799" — Better Auth's default validator
-      // (letters/digits/underscore/dot only) rejects the "/" separator.
-      usernameValidator: (username) => /^[a-zA-Z0-9/_.-]+$/.test(username),
+      usernameValidator: isValidUsername,
     }),
     // Must be last: lets auth.api.* calls made from Server Actions (like
     // src/app/login/actions.ts) write the session cookie via next/headers.

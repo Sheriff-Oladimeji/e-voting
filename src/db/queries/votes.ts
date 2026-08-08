@@ -1,7 +1,15 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { ballot, vote, election, candidate } from "@/db/schema";
+import { ballot, vote, election, candidate, position } from "@/db/schema";
 import { isElectionOpen } from "@/lib/election-window";
+
+export async function listVotedPositionIds(studentId: string, electionId: string): Promise<string[]> {
+  const rows = await db
+    .select({ positionId: ballot.positionId })
+    .from(ballot)
+    .where(and(eq(ballot.studentId, studentId), eq(ballot.electionId, electionId)));
+  return rows.map((r) => r.positionId);
+}
 
 export async function castVote(input: {
   studentId: string;
@@ -12,6 +20,11 @@ export async function castVote(input: {
   const [electionRow] = await db.select().from(election).where(eq(election.id, input.electionId));
   if (!electionRow || !isElectionOpen(electionRow, new Date())) {
     return { success: false, error: "This election is not open for voting." };
+  }
+
+  const [positionRow] = await db.select().from(position).where(eq(position.id, input.positionId));
+  if (!positionRow || positionRow.electionId !== input.electionId) {
+    return { success: false, error: "This position does not belong to the given election." };
   }
 
   const [candidateRow] = await db.select().from(candidate).where(eq(candidate.id, input.candidateId));

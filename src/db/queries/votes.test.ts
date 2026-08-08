@@ -79,4 +79,23 @@ describe("castVote", () => {
     await db.delete(position).where(eq(position.id, otherPosition.id));
     await cleanupElection(e.id, p.id, c.id);
   });
+
+  it("rejects a vote when the position does not belong to the given election", async () => {
+    const { election: e, position: p, candidate: c } = await seedElection("active");
+    const other = await seedElection("active");
+    const studentId = "test-student-id-4";
+
+    // positionId/candidateId are a real, matching pair — just from a different election
+    const result = await castVote({ studentId, electionId: e.id, positionId: other.position.id, candidateId: other.candidate.id });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toMatch(/does not belong/i);
+    }
+
+    const voteRows = await db.select().from(vote).where(eq(vote.positionId, other.position.id));
+    expect(voteRows).toHaveLength(0);
+
+    await cleanupElection(e.id, p.id, c.id);
+    await cleanupElection(other.election.id, other.position.id, other.candidate.id);
+  });
 });

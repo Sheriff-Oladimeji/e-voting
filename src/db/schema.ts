@@ -24,6 +24,10 @@ export const candidate = pgTable("candidate", {
   name: text("name").notNull(),
   photoUrl: text("photo_url"),
   manifesto: text("manifesto"),
+  // Not the candidate's login identity — just metadata for the "filter
+  // candidates by faculty/department" smart search requirement.
+  faculty: text("faculty"),
+  department: text("department"),
 });
 
 export const ballot = pgTable(
