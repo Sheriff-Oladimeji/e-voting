@@ -24,7 +24,10 @@ export default function StudentsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">Import students</h1>
+      <Link href="/admin" className="text-sm text-muted-foreground hover:underline">
+        ← Admin
+      </Link>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">Import students</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         CSV with columns: <code className="rounded bg-muted px-1 py-0.5">matric_number</code>,{" "}
         <code className="rounded bg-muted px-1 py-0.5">name</code>,{" "}

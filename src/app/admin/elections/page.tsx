@@ -14,7 +14,10 @@ export default async function ElectionsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">Elections</h1>
+      <Link href="/admin" className="text-sm text-muted-foreground hover:underline">
+        ← Admin
+      </Link>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">Elections</h1>
 
       <div className="mt-6 flex flex-col divide-y divide-border rounded-lg border border-border">
         {elections.length === 0 && (

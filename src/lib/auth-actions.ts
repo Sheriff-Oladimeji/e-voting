@@ -1,5 +1,7 @@
 "use server";
 
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { APIError } from "better-auth";
 import { auth } from "@/lib/auth";
 
@@ -37,4 +39,9 @@ export async function signIn(input: {
       return { success: false, error: "Something went wrong. Please try again." };
     }
   }
+}
+
+export async function signOutAction() {
+  await auth.api.signOut({ headers: await headers() });
+  redirect("/");
 }

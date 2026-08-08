@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listActiveElections } from "@/db/queries/elections";
 import { getSessionUser } from "@/lib/get-session";
 import { isStudentEligibleForElection } from "@/lib/eligibility";
+import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function StudentHome() {
   const user = await getSessionUser();
@@ -12,7 +13,10 @@ export default async function StudentHome() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">Your elections</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight">Your elections</h1>
+        <SignOutButton />
+      </div>
       <p className="mt-2 text-sm text-muted-foreground">Elections currently open for you to vote in.</p>
 
       <div className="mt-6 flex flex-col divide-y divide-border rounded-lg border border-border">
