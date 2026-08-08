@@ -19,7 +19,7 @@ async function getSessionWithRetry(headers: Headers) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = await getSessionWithRetry(request.headers);
   const decision = resolveRouteAccess(
     request.nextUrl.pathname,
