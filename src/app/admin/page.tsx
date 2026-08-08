@@ -30,7 +30,7 @@ export default async function AdminHome() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-12">
+    <div className="w-full px-10 py-12">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
         <SignOutButton />

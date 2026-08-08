@@ -18,7 +18,7 @@ export default async function ElectionsPage() {
   const elections = await listElections();
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-12">
+    <div className="w-full px-10 py-12">
       <Link href="/admin" className="text-sm text-muted-foreground hover:underline">
         ← Admin
       </Link>
@@ -38,10 +38,10 @@ export default async function ElectionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Window</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="w-full">Title</TableHead>
+                  <TableHead className="whitespace-nowrap">Status</TableHead>
+                  <TableHead className="whitespace-nowrap">Window</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

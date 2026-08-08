@@ -31,7 +31,7 @@ export default async function ElectionResultsPage({
   }));
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-12 print:px-0 print:py-0">
+    <div className="w-full px-10 py-12 print:px-0 print:py-0">
       <div className="flex items-center justify-between print:hidden">
         <Link href={`/admin/elections/${electionId}`} className="text-sm text-muted-foreground hover:underline">
           ← {election.title}

@@ -28,7 +28,7 @@ export default async function ElectionDetailPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-12">
+    <div className="w-full px-10 py-12">
       <Link href="/admin/elections" className="text-sm text-muted-foreground hover:underline">
         ← All elections
       </Link>

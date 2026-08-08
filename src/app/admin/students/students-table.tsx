@@ -29,11 +29,11 @@ export function StudentsTable({ students }: { students: Student[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Matric number</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Faculty / Department</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="w-[20%]">Name</TableHead>
+          <TableHead className="whitespace-nowrap">Matric number</TableHead>
+          <TableHead className="w-full">Email</TableHead>
+          <TableHead className="whitespace-nowrap">Faculty / Department</TableHead>
+          <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
