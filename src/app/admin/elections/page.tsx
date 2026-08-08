@@ -38,29 +38,29 @@ export default async function ElectionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-full">Title</TableHead>
-                  <TableHead className="whitespace-nowrap">Status</TableHead>
-                  <TableHead className="whitespace-nowrap">Window</TableHead>
-                  <TableHead className="text-right whitespace-nowrap">Action</TableHead>
+                  <TableHead className="w-[40%]">Title</TableHead>
+                  <TableHead className="w-[15%] whitespace-nowrap">Status</TableHead>
+                  <TableHead className="w-[25%] whitespace-nowrap">Window</TableHead>
+                  <TableHead className="w-[20%] text-right whitespace-nowrap">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {elections.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell>
+                    <TableCell className="py-4">
                       <Link href={`/admin/elections/${e.id}`} className="font-medium hover:underline">
                         {e.title}
                       </Link>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-4">
                       <Badge variant="outline" className={statusBadgeClass[e.status]}>
                         {e.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-4 text-muted-foreground">
                       {new Date(e.startAt).toLocaleDateString()} – {new Date(e.endAt).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <ElectionStatusControl electionId={e.id} status={e.status} />
                         <EditElectionDialog

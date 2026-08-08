@@ -30,10 +30,10 @@ export function StudentsTable({ students }: { students: Student[] }) {
       <TableHeader>
         <TableRow>
           <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead className="whitespace-nowrap">Matric number</TableHead>
-          <TableHead className="w-full">Email</TableHead>
-          <TableHead className="whitespace-nowrap">Faculty / Department</TableHead>
-          <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+          <TableHead className="w-[15%] whitespace-nowrap">Matric number</TableHead>
+          <TableHead className="w-[25%]">Email</TableHead>
+          <TableHead className="w-[25%] whitespace-nowrap">Faculty / Department</TableHead>
+          <TableHead className="w-[15%] text-right whitespace-nowrap">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -42,13 +42,13 @@ export function StudentsTable({ students }: { students: Student[] }) {
             <EditRow key={s.id} student={s} onCancel={() => setEditingId(null)} onSaved={() => setEditingId(null)} />
           ) : (
             <TableRow key={s.id}>
-              <TableCell className="font-medium">{s.name}</TableCell>
-              <TableCell className="text-muted-foreground">{s.username}</TableCell>
-              <TableCell className="text-muted-foreground">{s.email}</TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="py-4 font-medium">{s.name}</TableCell>
+              <TableCell className="py-4 text-muted-foreground">{s.username}</TableCell>
+              <TableCell className="py-4 text-muted-foreground">{s.email}</TableCell>
+              <TableCell className="py-4 text-muted-foreground">
                 {[s.faculty, s.department].filter(Boolean).join(" — ") || "—"}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="py-4 text-right">
                 <div className="flex items-center justify-end gap-1">
                   {invited === s.id ? (
                     <span className="px-2 text-xs text-emerald-700 dark:text-emerald-400">Invite sent</span>
