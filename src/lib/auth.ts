@@ -19,6 +19,17 @@ export const auth = betterAuth({
   // all for non-admins, rather than let the token exist unusably.
   emailAndPassword: {
     enabled: true,
+    // Every signUpEmail call in this app happens on behalf of someone ELSE
+    // (importStudents creating a student account from an admin's Server
+    // Action; the one-off db/seed.ts admin bootstrap) — never a real user
+    // signing themselves up in a browser. Better Auth's default is to log
+    // the browser in as the newly created account, and since nextCookies()
+    // writes whatever session cookie the most recent auth.api.* call
+    // produced, that meant creating a student silently swapped the ADMIN's
+    // session for the new STUDENT's session, bouncing them to /403 on their
+    // next click. autoSignIn: false stops signUpEmail from creating a
+    // session at all, which is correct for both callers.
+    autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
       if ((user as { role?: string }).role !== "admin") return;
       await sendAccountEmail({ to: user.email, url });
