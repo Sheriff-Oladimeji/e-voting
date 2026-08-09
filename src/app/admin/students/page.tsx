@@ -33,8 +33,9 @@ export default async function StudentsPage() {
                 <code className="rounded bg-muted px-1 py-0.5">name</code>,{" "}
                 <code className="rounded bg-muted px-1 py-0.5">email</code>,{" "}
                 <code className="rounded bg-muted px-1 py-0.5">faculty</code>,{" "}
-                <code className="rounded bg-muted px-1 py-0.5">department</code>. Each new student gets an email to
-                set their password. Re-uploading the same file skips students who already exist.
+                <code className="rounded bg-muted px-1 py-0.5">department</code>. No email is sent on import —
+                students sign in with a one-time code sent to their email at login time. Re-uploading the same file
+                skips students who already exist.
               </p>
               <CsvImportForm />
             </TabsContent>

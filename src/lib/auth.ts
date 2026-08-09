@@ -10,9 +10,17 @@ import { isValidUsername } from "./username-format";
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
   // Admin-only: students never use a password (see the emailOTP plugin below).
+  // Every account technically has a password field (students get an unusable
+  // random one on import), so without the role check here a student could
+  // use the public /forgot-password page to set a real password for
+  // themselves — defeating the OTP-only design even though nothing else in
+  // the app accepts that password for a student (requireAdmin()/proxy.ts
+  // still block them everywhere it matters). Never send the reset link at
+  // all for non-admins, rather than let the token exist unusably.
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
+      if ((user as { role?: string }).role !== "admin") return;
       await sendAccountEmail({ to: user.email, url });
     },
   },

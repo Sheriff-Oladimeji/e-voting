@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,22 +41,29 @@ export function EditElectionForm({
   const [faculty, setFaculty] = useState(initial.eligibleFaculties?.[0] ?? ANY_FACULTY);
   const [departments, setDepartments] = useState<string[]>(initial.eligibleDepartments ?? []);
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const availableDepartments = faculty === ANY_FACULTY ? [] : departmentsForFaculty(faculty);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    await updateElectionAction(electionId, {
-      title,
-      startAt,
-      endAt,
-      eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
-      eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
-    });
-    setPending(false);
-    router.refresh();
-    onSaved();
+    setError(null);
+    try {
+      await updateElectionAction(electionId, {
+        title,
+        startAt,
+        endAt,
+        eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
+        eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
+      });
+      router.refresh();
+      onSaved();
+    } catch {
+      setError("Couldn't save changes — please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -132,6 +140,16 @@ export function EditElectionForm({
               ))}
             </div>
           </ScrollArea>
+        </div>
+      )}
+
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
         </div>
       )}
 

@@ -33,7 +33,7 @@ export function VotingFlow({
   votedPositionIds: string[];
 }) {
   const router = useRouter();
-  const { searchQuery, setSearchQuery, selections, selectCandidate, reset } = useVotingStore();
+  const { searchQuery, setSearchQuery, selections, selectCandidate, clearSelections, reset } = useVotingStore();
   const [pending, setPending] = useState(false);
   const [confirmation, setConfirmation] = useState<{ referenceCode: string } | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
@@ -60,6 +60,13 @@ export function VotingFlow({
     setPending(false);
     if (!result.success) {
       setErrors(result.errors);
+      if (result.succeededPositionIds.length > 0) {
+        // Some positions in this batch committed before the failure — drop
+        // them from the local selection and refresh votedPositionIds so a
+        // retry doesn't resend them.
+        clearSelections(result.succeededPositionIds);
+        router.refresh();
+      }
       return;
     }
     setConfirmation({ referenceCode: result.referenceCode });

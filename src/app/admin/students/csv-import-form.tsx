@@ -15,29 +15,41 @@ export function CsvImportForm() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [result, setResult] = useState<StudentImportResult | null>(null);
+  const [fatalError, setFatalError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
     setFileName(file.name);
     setResult(null);
+    setFatalError(null);
     const text = await file.text();
     const rows = parseCsvWithHeader(text);
 
     const combined: StudentImportResult = { created: 0, skipped: 0, errors: [] };
     setProgress({ done: 0, total: rows.length });
 
-    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-      const batch = rows.slice(i, i + BATCH_SIZE);
-      const startRow = i + 2; // +1 for 0-index, +1 for the header row
-      const batchResult = await importStudentBatchAction(batch, startRow);
-      combined.created += batchResult.created;
-      combined.skipped += batchResult.skipped;
-      combined.errors.push(...batchResult.errors);
-      setProgress({ done: Math.min(i + BATCH_SIZE, rows.length), total: rows.length });
+    try {
+      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+        const batch = rows.slice(i, i + BATCH_SIZE);
+        const startRow = i + 2; // +1 for 0-index, +1 for the header row
+        const batchResult = await importStudentBatchAction(batch, startRow);
+        combined.created += batchResult.created;
+        combined.skipped += batchResult.skipped;
+        combined.errors.push(...batchResult.errors);
+        setProgress({ done: Math.min(i + BATCH_SIZE, rows.length), total: rows.length });
+      }
+      setResult(combined);
+      router.refresh();
+    } catch {
+      // Rows already imported by earlier batches stay imported — importStudents
+      // treats re-imports as skips, so re-uploading the same file is safe.
+      setResult(combined);
+      setFatalError(
+        `Stopped after ${combined.created + combined.skipped} of ${rows.length} rows — please try uploading the file again.`
+      );
+      router.refresh();
+    } finally {
+      setProgress(null);
     }
-
-    setResult(combined);
-    setProgress(null);
-    router.refresh();
   }
 
   return (
@@ -62,6 +74,13 @@ export function CsvImportForm() {
           <p className="text-sm text-muted-foreground">
             Importing {progress.done} of {progress.total}…
           </p>
+        </div>
+      )}
+
+      {fatalError && (
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{fatalError}</span>
         </div>
       )}
 

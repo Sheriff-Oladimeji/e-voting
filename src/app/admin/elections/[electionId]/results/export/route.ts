@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { getElection } from "@/db/queries/elections";
 import { getVoteTallyForElection, getTurnoutForElection } from "@/db/queries/results";
 import { buildResultsCsv } from "@/lib/results-csv";
-import { getSessionUser } from "@/lib/get-session";
+import { requireAdmin } from "@/lib/get-session";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ electionId: string }> }) {
-  const user = await getSessionUser();
-  if (!user || (user as { role?: string }).role !== "admin") {
+  try {
+    await requireAdmin();
+  } catch {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

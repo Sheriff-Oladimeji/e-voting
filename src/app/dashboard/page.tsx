@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listActiveElections } from "@/db/queries/elections";
 import { getSessionUser } from "@/lib/get-session";
 import { isStudentEligibleForElection } from "@/lib/eligibility";
+import { isElectionOpen } from "@/lib/election-window";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function StudentHome() {
@@ -9,7 +10,14 @@ export default async function StudentHome() {
   const student = { faculty: (user as { faculty?: string })?.faculty ?? null, department: (user as { department?: string })?.department ?? null };
 
   const activeElections = await listActiveElections();
-  const eligibleElections = activeElections.filter((e) => isStudentEligibleForElection(e, student));
+  const now = new Date();
+  // listActiveElections only filters by status — an election can be "active"
+  // before its startAt or after its endAt. The vote page 404s outside that
+  // window, so filtering here too keeps the dashboard from linking students
+  // to a dead end.
+  const eligibleElections = activeElections
+    .filter((e) => isElectionOpen(e, now))
+    .filter((e) => isStudentEligibleForElection(e, student));
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">

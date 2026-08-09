@@ -26,28 +26,33 @@ export function AddSingleStudentForm() {
     e.preventDefault();
     setPending(true);
     setResult(null);
-    const outcome = await addSingleStudentAction({
-      matric_number: matricNumber,
-      name,
-      email,
-      faculty: faculty ?? undefined,
-      department: department ?? undefined,
-    });
-    setPending(false);
+    try {
+      const outcome = await addSingleStudentAction({
+        matric_number: matricNumber,
+        name,
+        email,
+        faculty: faculty ?? undefined,
+        department: department ?? undefined,
+      });
 
-    if (outcome.created === 1) {
-      setResult({ success: true, message: `${name} was added and sent an invite email.` });
-      setMatricNumber("");
-      setName("");
-      setEmail("");
-      setFaculty(null);
-      setDepartment(null);
-    } else if (outcome.skipped === 1) {
-      setResult({ success: false, message: "A student with that matric number or email already exists." });
-    } else {
-      setResult({ success: false, message: outcome.errors[0]?.reason ?? "Couldn't add that student." });
+      if (outcome.created === 1) {
+        setResult({ success: true, message: `${name} was added. They can now sign in with their matric number and email.` });
+        setMatricNumber("");
+        setName("");
+        setEmail("");
+        setFaculty(null);
+        setDepartment(null);
+      } else if (outcome.skipped === 1) {
+        setResult({ success: false, message: "A student with that matric number or email already exists." });
+      } else {
+        setResult({ success: false, message: outcome.errors[0]?.reason ?? "Couldn't add that student." });
+      }
+      router.refresh();
+    } catch {
+      setResult({ success: false, message: "Something went wrong — please try again." });
+    } finally {
+      setPending(false);
     }
-    router.refresh();
   }
 
   return (

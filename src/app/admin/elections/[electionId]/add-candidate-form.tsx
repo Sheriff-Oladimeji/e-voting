@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,14 +25,21 @@ export function AddCandidateForm({
   const [faculty, setFaculty] = useState("");
   const [department, setDepartment] = useState("");
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    await addCandidateAction(electionId, { positionId, name, photoUrl, manifesto, faculty, department });
-    setPending(false);
-    router.refresh();
-    onAdded();
+    setError(null);
+    try {
+      await addCandidateAction(electionId, { positionId, name, photoUrl, manifesto, faculty, department });
+      router.refresh();
+      onAdded();
+    } catch {
+      setError("Couldn't add this candidate — please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -63,6 +71,15 @@ export function AddCandidateForm({
           rows={3}
         />
       </div>
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
       <Button
         type="submit"
         disabled={pending}

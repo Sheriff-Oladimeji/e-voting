@@ -93,18 +93,24 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
 
   async function handleCreate() {
     setPending(true);
-    await createElectionAction({
-      title,
-      startAt,
-      endAt,
-      positionTitles: finalPositions,
-      eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
-      eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
-      positionCandidates: finalPositions.map((_, i) => candidatesByPosition[i] ?? []),
-    });
-    setPending(false);
-    router.refresh();
-    onCreated();
+    setStepError(null);
+    try {
+      await createElectionAction({
+        title,
+        startAt,
+        endAt,
+        positionTitles: finalPositions,
+        eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
+        eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
+        positionCandidates: finalPositions.map((_, i) => candidatesByPosition[i] ?? []),
+      });
+      router.refresh();
+      onCreated();
+    } catch {
+      setStepError("Couldn't create the election — please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (

@@ -1,9 +1,20 @@
 import { headers } from "next/headers";
 import { auth } from "./auth";
 
+// Neon's free tier suspends its compute when idle, and the first query after
+// a suspend can outlast the driver's connect timeout. This is the first DB
+// touch of nearly every Server Action in the app (every admin action starts
+// with requireAdmin()), so retrying here once — the same pattern already
+// used for proxy.ts's session lookup and sign-in — absorbs most cold-start
+// failures before they ever reach an action body.
 export async function getSessionUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  return session?.user ?? null;
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    return session?.user ?? null;
+  } catch {
+    const session = await auth.api.getSession({ headers: await headers() });
+    return session?.user ?? null;
+  }
 }
 
 // Server Actions and Route Handlers are reachable by their own dispatch
