@@ -1,20 +1,33 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { parseCsvWithHeader } from "@/lib/csv";
 import {
   importStudents,
   updateStudent,
   removeStudent,
   resendInvite,
+  type StudentImportRow,
   type StudentImportResult,
 } from "@/db/queries/students";
 import { requireAdmin } from "@/lib/get-session";
 
-export async function importStudentsFromCsv(csvText: string): Promise<StudentImportResult> {
+// Takes already-parsed rows (not raw CSV text) so the client can chunk a large
+// file into batches and show real progress between calls, instead of one long
+// opaque request for the whole file. startRow lets error messages report the
+// row's true position in the original file, not its position within the batch.
+export async function importStudentBatchAction(
+  rows: StudentImportRow[],
+  startRow: number
+): Promise<StudentImportResult> {
   await requireAdmin();
-  const rows = parseCsvWithHeader(csvText);
-  const result = await importStudents(rows);
+  const result = await importStudents(rows, startRow);
+  revalidatePath("/admin/students");
+  return result;
+}
+
+export async function addSingleStudentAction(row: StudentImportRow): Promise<StudentImportResult> {
+  await requireAdmin();
+  const result = await importStudents([row]);
   revalidatePath("/admin/students");
   return result;
 }

@@ -19,11 +19,14 @@ export type StudentImportResult = {
   errors: { row: number; reason: string }[];
 };
 
-export async function importStudents(rows: StudentImportRow[]): Promise<StudentImportResult> {
+export async function importStudents(
+  rows: StudentImportRow[],
+  startRow: number = 2 // +1 for 0-index, +1 for the header row — override when importing a batch/chunk of a larger file
+): Promise<StudentImportResult> {
   const result: StudentImportResult = { created: 0, skipped: 0, errors: [] };
 
   for (let i = 0; i < rows.length; i++) {
-    const rowNumber = i + 2; // +1 for 0-index, +1 for the header row
+    const rowNumber = startRow + i;
     const { matric_number: matricNumber, name, email, faculty, department } = rows[i];
 
     if (!matricNumber || !name || !email) {
@@ -35,8 +38,9 @@ export async function importStudents(rows: StudentImportRow[]): Promise<StudentI
       continue;
     }
 
-    const [existing] = await db.select().from(user).where(eq(user.username, matricNumber));
-    if (existing) {
+    const [existingByUsername] = await db.select().from(user).where(eq(user.username, matricNumber));
+    const [existingByEmail] = await db.select().from(user).where(eq(user.email, email));
+    if (existingByUsername || existingByEmail) {
       result.skipped++;
       continue;
     }
@@ -61,6 +65,13 @@ export async function importStudents(rows: StudentImportRow[]): Promise<StudentI
       result.created++;
     } catch (err) {
       const reason = err instanceof Error ? err.message : "Unknown error";
+      // A duplicate account slipping past the pre-check above (e.g. a race
+      // between two rows importing at once) isn't a real error — skip it
+      // the same way the pre-check does, instead of surfacing it as a failure.
+      if (reason.toLowerCase().includes("already exists")) {
+        result.skipped++;
+        continue;
+      }
       result.errors.push({ row: rowNumber, reason });
     }
   }

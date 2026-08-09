@@ -1,11 +1,39 @@
 matric_number,name,email,faculty,department
-2022/409799,Amara Chukwu,amara.chukwu@example.edu,Engineering,Computer Engineering
-2022/311204,Tariq Bello,tariq.bello@example.edu,Engineering,Mechanical Engineering
-2021/287345,Ifeoma Obi,ifeoma.obi@example.edu,Sciences,Physics
-2023/502187,Chinedu Eze,chinedu.eze@example.edu,Sciences,Chemistry
-2022/198456,Ngozi Adeyemi,ngozi.adeyemi@example.edu,Social Sciences,Economics
-2021/364920,Femi Okonkwo,femi.okonkwo@example.edu,Engineering,Civil Engineering
-2023/415678,Halima Yusuf,halima.yusuf@example.edu,Arts,History
-2022/276531,Emeka Nwosu,emeka.nwosu@example.edu,Social Sciences,Political Science
-2021/439012,Zainab Suleiman,zainab.suleiman@example.edu,Sciences,Biology
-2023/158923,Kelechi Okafor,kelechi.okafor@example.edu,Engineering,Computer Engineering
+2022/409799,Amara Chukwu,amara.chukwu@example.edu,Faculty of Engineering,Computer Engineering
+2022/311204,Tariq Bello,tariq.bello@example.edu,Faculty of Engineering,Mechanical Engineering
+2021/364920,Femi Okonkwo,femi.okonkwo@example.edu,Faculty of Engineering,Civil Engineering
+2023/158923,Kelechi Okafor,kelechi.okafor@example.edu,Faculty of Engineering,Electrical/Electronics Engineering
+2022/198456,Ngozi Adeyemi,ngozi.adeyemi@example.edu,Faculty of Social Sciences,Economics
+2022/276531,Emeka Nwosu,emeka.nwosu@example.edu,Faculty of Social Sciences,Political Science
+2023/512034,Folake Ogunleye,folake.ogunleye@example.edu,Faculty of Social Sciences,Sociology
+2021/439012,Zainab Suleiman,zainab.suleiman@example.edu,Faculty of Basic and Applied Sciences,Animal and Environmental Biology
+2023/502187,Chinedu Eze,chinedu.eze@example.edu,Faculty of Basic and Applied Sciences,Pure and Applied Chemistry
+2022/347612,Chiamaka Okoye,chiamaka.okoye@example.edu,Faculty of Basic and Applied Sciences,Microbiology
+2023/415678,Halima Yusuf,halima.yusuf@example.edu,Faculty of Humanities,History and International Studies
+2021/298734,Adaeze Nnamdi,adaeze.nnamdi@example.edu,Faculty of Humanities,English and Literary Studies
+2022/183456,Yakubu Danjuma,yakubu.danjuma@example.edu,Faculty of Agricultural Production and Management,Agricultural Economics and Agribusiness Management
+2023/276890,Oluwaseun Afolabi,oluwaseun.afolabi@example.edu,Faculty of Agricultural Production and Management,Animal Science
+2021/354201,Blessing Etim,blessing.etim@example.edu,Faculty of Renewable Natural Resources Management,Fisheries and Aquatic Resources Management
+2022/467823,Ibrahim Musa,ibrahim.musa@example.edu,Faculty of Renewable Natural Resources Management,Forestry Resource Management
+2023/129045,Segun Adebayo,segun.adebayo@example.edu,Faculty of Education,Educational Management
+2021/398217,Aisha Bello,aisha.bello@example.edu,Faculty of Education,Guidance and Counselling
+2022/501672,Uche Okonkwo,uche.okonkwo@example.edu,Faculty of Basic Medical Sciences,Anatomy
+2023/234519,Grace Effiong,grace.effiong@example.edu,Faculty of Basic Medical Sciences,Physiology
+2021/276340,Sani Abdullahi,sani.abdullahi@example.edu,Faculty of Basic Clinical Sciences,Chemical Pathology
+2022/389156,Nnamdi Uzoma,nnamdi.uzoma@example.edu,Faculty of Basic Clinical Sciences,Pharmacology
+2023/412987,Rahma Suleiman,rahma.suleiman@example.edu,Faculty of Clinical Sciences,Medicine
+2021/345678,Damilola Oyelaran,damilola.oyelaran@example.edu,Faculty of Clinical Sciences,Surgery
+2022/298012,Chukwuemeka Ibe,chukwuemeka.ibe@example.edu,Faculty of Nursing Sciences,Medical-Surgical Nursing
+2023/167234,Fatima Aliyu,fatima.aliyu@example.edu,Faculty of Nursing Sciences,Public/Community Health Nursing
+2021/423890,Precious Enyinnaya,precious.enyinnaya@example.edu,Faculty of Computing and Information Technology,Computer Science
+2022/356712,Bashir Garba,bashir.garba@example.edu,Faculty of Computing and Information Technology,Cyber Security
+2023/489201,Temitope Ajayi,temitope.ajayi@example.edu,Faculty of Environmental Sciences,Architecture
+2021/312456,Godwin Effiong,godwin.effiong@example.edu,Faculty of Environmental Sciences,Estate Management
+2022/278934,Amina Lawal,amina.lawal@example.edu,Faculty of Liberal Studies,Criminology and Security Studies
+2023/345601,Obinna Nwachukwu,obinna.nwachukwu@example.edu,Faculty of Liberal Studies,Peace and Conflict Studies
+2021/467123,Ronke Fashola,ronke.fashola@example.edu,Faculty of Law,Common and Islamic Law
+2022/398456,Ifeoma Obi,ifeoma.obi@example.edu,Faculty of Law,Public and International Law
+2023/512890,Ahmad Suleiman,ahmad.suleiman@example.edu,Faculty of Management Sciences,Accounting
+2021/276512,Ijeoma Chukwuma,ijeoma.chukwuma@example.edu,Faculty of Management Sciences,Business Administration
+2022/389734,Wale Ogundipe,wale.ogundipe@example.edu,Faculty of Culture,Theatre Arts
+2023/145678,Hauwa Ibrahim,hauwa.ibrahim@example.edu,Faculty of Culture,Tourism

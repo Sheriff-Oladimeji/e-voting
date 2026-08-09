@@ -3,23 +3,40 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadCloud, CheckCircle2, AlertCircle } from "lucide-react";
-import { importStudentsFromCsv } from "./actions";
+import { Progress } from "@/components/ui/progress";
+import { parseCsvWithHeader } from "@/lib/csv";
+import { importStudentBatchAction } from "./actions";
 import type { StudentImportResult } from "@/db/queries/students";
+
+const BATCH_SIZE = 5;
 
 export function CsvImportForm() {
   const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [result, setResult] = useState<StudentImportResult | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [result, setResult] = useState<StudentImportResult | null>(null);
 
   async function handleFile(file: File) {
     setFileName(file.name);
-    setPending(true);
     setResult(null);
     const text = await file.text();
-    const outcome = await importStudentsFromCsv(text);
-    setResult(outcome);
-    setPending(false);
+    const rows = parseCsvWithHeader(text);
+
+    const combined: StudentImportResult = { created: 0, skipped: 0, errors: [] };
+    setProgress({ done: 0, total: rows.length });
+
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      const batch = rows.slice(i, i + BATCH_SIZE);
+      const startRow = i + 2; // +1 for 0-index, +1 for the header row
+      const batchResult = await importStudentBatchAction(batch, startRow);
+      combined.created += batchResult.created;
+      combined.skipped += batchResult.skipped;
+      combined.errors.push(...batchResult.errors);
+      setProgress({ done: Math.min(i + BATCH_SIZE, rows.length), total: rows.length });
+    }
+
+    setResult(combined);
+    setProgress(null);
     router.refresh();
   }
 
@@ -39,7 +56,14 @@ export function CsvImportForm() {
         />
       </label>
 
-      {pending && <p className="mt-4 text-sm text-muted-foreground">Importing…</p>}
+      {progress && (
+        <div className="mt-4 flex flex-col gap-2">
+          <Progress value={(progress.done / progress.total) * 100} />
+          <p className="text-sm text-muted-foreground">
+            Importing {progress.done} of {progress.total}…
+          </p>
+        </div>
+      )}
 
       {result && (
         <div className="mt-6 flex flex-col gap-3">

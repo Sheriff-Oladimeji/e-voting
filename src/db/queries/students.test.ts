@@ -4,7 +4,13 @@ import { db } from "@/db";
 import { user } from "@/db/auth-schema";
 import { importStudents, listStudents, updateStudent, removeStudent } from "./students";
 
-const testUsernames = ["test-import-2022/900001", "test-import-2022/900002", "test-import-2022/900004"];
+const testUsernames = [
+  "test-import-2022/900001",
+  "test-import-2022/900002",
+  "test-import-2022/900004",
+  "test-import-2022/900005",
+  "test-import-2022/900006",
+];
 
 afterEach(async () => {
   for (const username of testUsernames) {
@@ -52,6 +58,22 @@ describe("importStudents", () => {
     const outcome = await importStudents([{ matric_number: "2022/900003", name: "No Email" }]);
     expect(outcome.errors).toHaveLength(1);
     expect(outcome.errors[0].reason).toMatch(/missing/i);
+  });
+
+  it("skips a row whose email already exists under a different matric number, without erroring", async () => {
+    const sharedEmail = "shared-import-test@example.com";
+    const first = await importStudents([{ matric_number: testUsernames[3], name: "First Student", email: sharedEmail }]);
+    expect(first).toEqual({ created: 1, skipped: 0, errors: [] });
+
+    const second = await importStudents([
+      { matric_number: testUsernames[4], name: "Second Student", email: sharedEmail },
+    ]);
+    expect(second).toEqual({ created: 0, skipped: 1, errors: [] });
+  });
+
+  it("offsets error row numbers by startRow, for chunked/batched imports", async () => {
+    const outcome = await importStudents([{ matric_number: "has spaces", name: "Bad Row", email: "x@example.com" }], 7);
+    expect(outcome.errors).toEqual([{ row: 7, reason: expect.stringMatching(/invalid matric number/i) }]);
   });
 });
 
