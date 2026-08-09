@@ -35,13 +35,16 @@ export default async function VoteElectionPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
+    <div className="mx-auto w-full max-w-3xl px-6 py-10 md:py-14">
       <Link href="/dashboard" className="text-sm text-muted-foreground hover:underline">
         ← Your elections
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">{election.title}</h1>
+      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h1 className="text-3xl font-semibold tracking-tight">{election.title}</h1>
+        <p className="text-sm text-muted-foreground">Closes {new Date(election.endAt).toLocaleString()}</p>
+      </div>
 
-      <div className="mt-8">
+      <div className="mt-10">
         <VotingFlow
           electionId={electionId}
           positions={positions}

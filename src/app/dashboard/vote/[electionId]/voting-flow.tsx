@@ -76,9 +76,11 @@ export function VotingFlow({
 
   if (confirmation) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-lg border border-emerald-600/20 bg-emerald-600/5 p-10 text-center">
-        <CheckCircle2 className="size-10 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-        <h2 className="text-xl font-semibold">✓ Vote Successfully Submitted</h2>
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-emerald-600/20 bg-emerald-600/5 p-14 text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-emerald-600/10">
+          <CheckCircle2 className="size-7 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+        </div>
+        <h2 className="text-xl font-semibold">Vote submitted</h2>
         <p className="text-sm text-muted-foreground">Your vote has been recorded. Keep this reference code:</p>
         <p className="font-mono text-lg font-medium tracking-wide">{confirmation.referenceCode}</p>
       </div>
@@ -87,9 +89,11 @@ export function VotingFlow({
 
   if (unvotedPositions.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-lg border border-border p-10 text-center text-sm text-muted-foreground">
-        <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-        You&apos;ve already voted in every position for this election.
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-border p-14 text-center">
+        <div className="flex size-12 items-center justify-center rounded-full bg-emerald-600/10">
+          <CheckCircle2 className="size-6 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+        </div>
+        <p className="text-sm text-muted-foreground">You&apos;ve already voted in every position for this election.</p>
       </div>
     );
   }
@@ -106,23 +110,35 @@ export function VotingFlow({
         />
       </div>
 
-      {unvotedPositions.map((position) => {
+      {unvotedPositions.map((position, i) => {
         const positionCandidates = candidates.filter((c) => c.positionId === position.id && matches(c));
+        const selectedId = selections[position.id];
         return (
           <div key={position.id}>
-            <h2 className="font-medium">{position.title}</h2>
-            <div className="mt-3 flex flex-col divide-y divide-border rounded-lg border border-border">
+            <div className="flex items-center gap-2">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+                {i + 1}
+              </span>
+              <h2 className="font-medium">{position.title}</h2>
+            </div>
+            <div className="mt-3 flex flex-col gap-2">
               {positionCandidates.length === 0 && (
-                <p className="p-4 text-sm text-muted-foreground">No candidates match your search.</p>
+                <p className="rounded-xl border border-border p-4 text-sm text-muted-foreground">
+                  No candidates match your search.
+                </p>
               )}
               {positionCandidates.map((c) => {
-                const selected = selections[position.id] === c.id;
+                const selected = selectedId === c.id;
                 return (
                   <button
                     key={c.id}
                     type="button"
                     onClick={() => selectCandidate(position.id, c.id)}
-                    className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-muted/50"
+                    className={
+                      selected
+                        ? "flex w-full items-center justify-between gap-4 rounded-xl border border-emerald-600/40 bg-emerald-600/5 p-4 text-left transition-all duration-150 ease-out active:scale-[0.99]"
+                        : "flex w-full items-center justify-between gap-4 rounded-xl border border-border p-4 text-left transition-all duration-150 ease-out hover:border-emerald-600/30 hover:bg-muted/40 active:scale-[0.99]"
+                    }
                   >
                     <div className="flex items-center gap-3">
                       {c.photoUrl ? (
