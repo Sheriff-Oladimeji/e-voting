@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CandidatePhotoUpload } from "@/components/candidate-photo-upload";
 import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
 import { createElectionAction } from "./actions";
 
@@ -326,11 +327,7 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
                   </SelectContent>
                 </Select>
               </div>
-              <Input
-                placeholder="Photo URL (optional)"
-                value={draftFor(i).photoUrl}
-                onChange={(e) => updateDraft(i, { photoUrl: e.target.value })}
-              />
+              <CandidatePhotoUpload value={draftFor(i).photoUrl} onChange={(url) => updateDraft(i, { photoUrl: url })} />
               <Textarea
                 placeholder="Manifesto (optional)"
                 rows={2}

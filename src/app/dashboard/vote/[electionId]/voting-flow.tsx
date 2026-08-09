@@ -124,14 +124,24 @@ export function VotingFlow({
                     onClick={() => selectCandidate(position.id, c.id)}
                     className="flex w-full items-center justify-between gap-4 p-4 text-left hover:bg-muted/50"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{c.name}</p>
-                      {(c.faculty || c.department) && (
-                        <p className="text-xs text-muted-foreground">
-                          {[c.faculty, c.department].filter(Boolean).join(" — ")}
-                        </p>
+                    <div className="flex items-center gap-3">
+                      {c.photoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- external upload host, no next.config domain to register
+                        <img src={c.photoUrl} alt={c.name} className="size-10 shrink-0 rounded-full border border-border object-cover" />
+                      ) : (
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                          {c.name.slice(0, 1).toUpperCase()}
+                        </span>
                       )}
-                      {c.manifesto && <p className="mt-1 text-xs text-muted-foreground">{c.manifesto}</p>}
+                      <div>
+                        <p className="text-sm font-medium">{c.name}</p>
+                        {(c.faculty || c.department) && (
+                          <p className="text-xs text-muted-foreground">
+                            {[c.faculty, c.department].filter(Boolean).join(" — ")}
+                          </p>
+                        )}
+                        {c.manifesto && <p className="mt-1 text-xs text-muted-foreground">{c.manifesto}</p>}
+                      </div>
                     </div>
                     <span
                       className={

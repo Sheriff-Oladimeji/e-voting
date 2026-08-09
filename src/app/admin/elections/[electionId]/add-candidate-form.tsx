@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CandidatePhotoUpload } from "@/components/candidate-photo-upload";
 import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
 import { addCandidateAction } from "./actions";
 
@@ -98,8 +99,8 @@ export function AddCandidateForm({
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor={`photo-${positionId}`}>Photo URL</Label>
-        <Input id={`photo-${positionId}`} value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} />
+        <Label>Photo</Label>
+        <CandidatePhotoUpload value={photoUrl} onChange={setPhotoUrl} />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor={`manifesto-${positionId}`}>Manifesto</Label>

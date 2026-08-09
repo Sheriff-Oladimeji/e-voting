@@ -65,13 +65,23 @@ export default async function ElectionDetailPage({
                 )}
                 {posCandidates.map((c) => (
                   <div key={c.id} className="flex items-center justify-between gap-4 px-6 py-3">
-                    <div>
-                      <p className="text-sm font-medium">{c.name}</p>
-                      {(c.faculty || c.department) && (
-                        <p className="text-xs text-muted-foreground">
-                          {[c.faculty, c.department].filter(Boolean).join(" — ")}
-                        </p>
+                    <div className="flex items-center gap-3">
+                      {c.photoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- external upload host, no next.config domain to register
+                        <img src={c.photoUrl} alt={c.name} className="size-9 shrink-0 rounded-full border border-border object-cover" />
+                      ) : (
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                          {c.name.slice(0, 1).toUpperCase()}
+                        </span>
                       )}
+                      <div>
+                        <p className="text-sm font-medium">{c.name}</p>
+                        {(c.faculty || c.department) && (
+                          <p className="text-xs text-muted-foreground">
+                            {[c.faculty, c.department].filter(Boolean).join(" — ")}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <RemoveCandidateButton electionId={electionId} candidateId={c.id} />
                   </div>
