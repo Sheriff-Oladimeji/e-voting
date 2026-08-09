@@ -10,6 +10,7 @@ vi.mock("@/db/queries/students", () => ({
 
 import { auth } from "@/lib/auth";
 import { findStudentByMatricAndEmail } from "@/db/queries/students";
+import { recordOtpEmailFailure } from "@/lib/otp-email-status";
 import { requestStudentOtpAction, verifyStudentOtpAction } from "./actions";
 
 afterEach(() => {
@@ -36,6 +37,21 @@ describe("requestStudentOtpAction", () => {
     expect(auth.api.sendVerificationOTP).toHaveBeenCalledWith({
       body: { email: "amara@example.com", type: "sign-in" },
     });
+  });
+
+  it("reports failure when the email provider failed, even though sendVerificationOTP resolved", async () => {
+    // Better Auth swallows errors thrown by the sendVerificationOTP callback
+    // (runInBackgroundOrAwait only logs them) — so the endpoint always
+    // resolves successfully. auth.ts records the failure out-of-band via
+    // recordOtpEmailFailure, and this action must check for it rather than
+    // trusting sendVerificationOTP's resolution alone.
+    vi.mocked(findStudentByMatricAndEmail).mockResolvedValue({ id: "1" } as never);
+    vi.mocked(auth.api.sendVerificationOTP).mockResolvedValue({ success: true } as never);
+    recordOtpEmailFailure("amara@example.com", "Resend send failed: network error");
+
+    const result = await requestStudentOtpAction("2022/409799", "amara@example.com");
+
+    expect(result).toEqual({ success: false, error: expect.stringMatching(/couldn.t send/i) });
   });
 });
 

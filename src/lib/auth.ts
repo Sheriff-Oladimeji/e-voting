@@ -6,6 +6,7 @@ import { db } from "@/db";
 import * as authSchema from "@/db/auth-schema";
 import { sendAccountEmail, sendOtpEmail } from "./email";
 import { isValidUsername } from "./username-format";
+import { recordOtpEmailFailure } from "./otp-email-status";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema: authSchema }),
@@ -49,8 +50,16 @@ export const auth = betterAuth({
       // rather than revealing whether that address is registered.
       disableSignUp: true,
       sendVerificationOTP: async ({ email, otp, type }) => {
-        if (type === "sign-in") {
+        if (type !== "sign-in") return;
+        try {
           await sendOtpEmail({ to: email, otp });
+        } catch (err) {
+          // Better Auth invokes this callback through runInBackgroundOrAwait,
+          // which logs a thrown error but never lets it reach
+          // auth.api.sendVerificationOTP()'s caller — without this, a failed
+          // send looks identical to a successful one and the student is left
+          // on a code-entry screen that will never receive a code.
+          recordOtpEmailFailure(email, err instanceof Error ? err.message : "Failed to send code");
         }
       },
     }),
