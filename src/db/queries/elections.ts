@@ -4,6 +4,14 @@ import { election, position, candidate, vote, ballot, type electionStatusEnum } 
 
 type ElectionStatus = (typeof electionStatusEnum.enumValues)[number];
 
+type CandidateInput = {
+  name: string;
+  photoUrl?: string;
+  manifesto?: string;
+  faculty?: string;
+  department?: string;
+};
+
 export async function createElection(input: {
   title: string;
   startAt: Date;
@@ -11,6 +19,7 @@ export async function createElection(input: {
   positionTitles: string[];
   eligibleFaculties?: string[];
   eligibleDepartments?: string[];
+  positionCandidates?: CandidateInput[][];
 }) {
   const [electionRow] = await db
     .insert(election)
@@ -23,13 +32,25 @@ export async function createElection(input: {
     })
     .returning();
 
-  if (input.positionTitles.length > 0) {
-    await db.insert(position).values(
-      input.positionTitles.map((title) => ({
-        electionId: electionRow.id,
-        title,
-      }))
-    );
+  for (let i = 0; i < input.positionTitles.length; i++) {
+    const [positionRow] = await db
+      .insert(position)
+      .values({ electionId: electionRow.id, title: input.positionTitles[i] })
+      .returning();
+
+    const candidates = input.positionCandidates?.[i];
+    if (candidates?.length) {
+      await db.insert(candidate).values(
+        candidates.map((c) => ({
+          positionId: positionRow.id,
+          name: c.name,
+          photoUrl: c.photoUrl || null,
+          manifesto: c.manifesto || null,
+          faculty: c.faculty || null,
+          department: c.department || null,
+        }))
+      );
+    }
   }
 
   return electionRow;

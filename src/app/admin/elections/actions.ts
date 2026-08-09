@@ -11,6 +11,13 @@ export async function createElectionAction(input: {
   positionTitles: string[];
   eligibleFaculties: string[];
   eligibleDepartments: string[];
+  positionCandidates?: {
+    name: string;
+    photoUrl?: string;
+    manifesto?: string;
+    faculty?: string;
+    department?: string;
+  }[][];
 }) {
   await requireAdmin();
   await createElection({
@@ -20,6 +27,7 @@ export async function createElectionAction(input: {
     positionTitles: input.positionTitles.filter(Boolean),
     eligibleFaculties: input.eligibleFaculties.filter(Boolean),
     eligibleDepartments: input.eligibleDepartments.filter(Boolean),
+    positionCandidates: input.positionCandidates,
   });
   revalidatePath("/admin/elections");
 }

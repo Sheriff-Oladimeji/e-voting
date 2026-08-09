@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listElections } from "@/db/queries/elections";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { CreateElectionDialog } from "./create-election-dialog";
@@ -38,17 +39,20 @@ export default async function ElectionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40%]">Title</TableHead>
-                  <TableHead className="w-[15%] whitespace-nowrap">Status</TableHead>
-                  <TableHead className="w-[25%] whitespace-nowrap">Window</TableHead>
-                  <TableHead className="w-[20%] text-right whitespace-nowrap">Action</TableHead>
+                  <TableHead className="w-[28%]">Title</TableHead>
+                  <TableHead className="w-[12%] whitespace-nowrap">Status</TableHead>
+                  <TableHead className="w-[20%] whitespace-nowrap">Window</TableHead>
+                  <TableHead className="w-[40%] text-right whitespace-nowrap">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {elections.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="py-4">
-                      <Link href={`/admin/elections/${e.id}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/admin/elections/${e.id}`}
+                        className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+                      >
                         {e.title}
                       </Link>
                     </TableCell>
@@ -62,6 +66,9 @@ export default async function ElectionsPage() {
                     </TableCell>
                     <TableCell className="py-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button variant="outline" size="sm" render={<Link href={`/admin/elections/${e.id}`} />}>
+                          Manage
+                        </Button>
                         <ElectionStatusControl electionId={e.id} status={e.status} />
                         <EditElectionDialog
                           electionId={e.id}
