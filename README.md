@@ -103,3 +103,4 @@ Most tests need `DATABASE_URL` set (steps 2–3 above) since they run against th
 ## Everything else
 
 Admin candidate/election management, the student voting flow, and results/reporting aren't built yet — `/admin` and `/dashboard` are placeholder pages for now.
+# e-voting
