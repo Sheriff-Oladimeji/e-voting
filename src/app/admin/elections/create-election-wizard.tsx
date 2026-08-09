@@ -288,30 +288,49 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
                 </div>
               )}
 
+              <Input
+                placeholder="Candidate name"
+                value={draftFor(i).name}
+                onChange={(e) => updateDraft(i, { name: e.target.value })}
+              />
               <div className="grid grid-cols-2 gap-3">
-                <Input
-                  placeholder="Candidate name"
-                  value={draftFor(i).name}
-                  onChange={(e) => updateDraft(i, { name: e.target.value })}
-                />
-                <Input
-                  placeholder="Faculty (optional)"
-                  value={draftFor(i).faculty}
-                  onChange={(e) => updateDraft(i, { faculty: e.target.value })}
-                />
+                <Select
+                  value={draftFor(i).faculty || undefined}
+                  onValueChange={(value) => updateDraft(i, { faculty: value ?? "", department: "" })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Faculty (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FACULTIES.map((f) => (
+                      <SelectItem key={f.name} value={f.name}>
+                        {f.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={draftFor(i).department || undefined}
+                  onValueChange={(value) => updateDraft(i, { department: value ?? "" })}
+                  disabled={!draftFor(i).faculty}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={draftFor(i).faculty ? "Department (optional)" : "Pick a faculty first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departmentsForFaculty(draftFor(i).faculty).map((d) => (
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  placeholder="Department (optional)"
-                  value={draftFor(i).department}
-                  onChange={(e) => updateDraft(i, { department: e.target.value })}
-                />
-                <Input
-                  placeholder="Photo URL (optional)"
-                  value={draftFor(i).photoUrl}
-                  onChange={(e) => updateDraft(i, { photoUrl: e.target.value })}
-                />
-              </div>
+              <Input
+                placeholder="Photo URL (optional)"
+                value={draftFor(i).photoUrl}
+                onChange={(e) => updateDraft(i, { photoUrl: e.target.value })}
+              />
               <Textarea
                 placeholder="Manifesto (optional)"
                 rows={2}

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
 import { addCandidateAction } from "./actions";
 
 export function AddCandidateForm({
@@ -22,17 +24,26 @@ export function AddCandidateForm({
   const [name, setName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [manifesto, setManifesto] = useState("");
-  const [faculty, setFaculty] = useState("");
-  const [department, setDepartment] = useState("");
+  const [faculty, setFaculty] = useState<string | null>(null);
+  const [department, setDepartment] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const availableDepartments = faculty ? departmentsForFaculty(faculty) : [];
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     setError(null);
     try {
-      await addCandidateAction(electionId, { positionId, name, photoUrl, manifesto, faculty, department });
+      await addCandidateAction(electionId, {
+        positionId,
+        name,
+        photoUrl,
+        manifesto,
+        faculty: faculty ?? "",
+        department: department ?? "",
+      });
       router.refresh();
       onAdded();
     } catch {
@@ -51,11 +62,39 @@ export function AddCandidateForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor={`faculty-${positionId}`}>Faculty</Label>
-          <Input id={`faculty-${positionId}`} value={faculty} onChange={(e) => setFaculty(e.target.value)} />
+          <Select
+            value={faculty ?? undefined}
+            onValueChange={(value) => {
+              setFaculty(value);
+              setDepartment(null);
+            }}
+          >
+            <SelectTrigger id={`faculty-${positionId}`} className="w-full">
+              <SelectValue placeholder="Select faculty" />
+            </SelectTrigger>
+            <SelectContent>
+              {FACULTIES.map((f) => (
+                <SelectItem key={f.name} value={f.name}>
+                  {f.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor={`department-${positionId}`}>Department</Label>
-          <Input id={`department-${positionId}`} value={department} onChange={(e) => setDepartment(e.target.value)} />
+          <Select value={department ?? undefined} onValueChange={setDepartment} disabled={!faculty}>
+            <SelectTrigger id={`department-${positionId}`} className="w-full">
+              <SelectValue placeholder={faculty ? "Select department" : "Pick a faculty first"} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableDepartments.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="flex flex-col gap-2">
