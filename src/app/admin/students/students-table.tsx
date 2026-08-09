@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Trash2, Mail, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { updateStudentAction, removeStudentAction, resendInviteAction } from "./actions";
+import { updateStudentAction, removeStudentAction } from "./actions";
 
 type Student = {
   id: string;
@@ -18,7 +18,6 @@ type Student = {
 
 export function StudentsTable({ students }: { students: Student[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [invited, setInvited] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   if (students.length === 0) {
@@ -50,24 +49,6 @@ export function StudentsTable({ students }: { students: Student[] }) {
               </TableCell>
               <TableCell className="py-4 text-right">
                 <div className="flex items-center justify-end gap-1">
-                  {invited === s.id ? (
-                    <span className="px-2 text-xs text-emerald-700 dark:text-emerald-400">Invite sent</span>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      disabled={pending}
-                      aria-label="Resend invite"
-                      onClick={() =>
-                        startTransition(async () => {
-                          await resendInviteAction(s.id);
-                          setInvited(s.id);
-                        })
-                      }
-                    >
-                      <Mail className="size-4" />
-                    </Button>
-                  )}
                   <Button variant="ghost" size="icon-sm" aria-label="Edit" onClick={() => setEditingId(s.id)}>
                     <Pencil className="size-4" />
                   </Button>

@@ -8,22 +8,22 @@ vi.mock("resend", () => ({
   }),
 }));
 
-import { sendAccountEmail } from "./email";
+import { sendAccountEmail, sendOtpEmail } from "./email";
 
 afterEach(() => {
   vi.clearAllMocks();
 });
 
 describe("sendAccountEmail", () => {
-  it("sends invite copy with the correct Resend request shape", async () => {
+  it("sends the reset-password link with the correct Resend request shape", async () => {
     sendMock.mockResolvedValue({ data: { id: "abc" }, error: null });
 
-    await sendAccountEmail({ to: "student@example.com", url: "https://app.test/set-password?token=abc", mode: "invite" });
+    await sendAccountEmail({ to: "admin@example.com", url: "https://app.test/reset-password?token=abc" });
 
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: ["student@example.com"],
-        subject: "Set your password",
+        to: ["admin@example.com"],
+        subject: "Reset your password",
       })
     );
   });
@@ -31,8 +31,31 @@ describe("sendAccountEmail", () => {
   it("throws when Resend returns an error", async () => {
     sendMock.mockResolvedValue({ data: null, error: { message: "bad request" } });
 
-    await expect(
-      sendAccountEmail({ to: "x@example.com", url: "https://app.test", mode: "reset" })
-    ).rejects.toThrow("Resend send failed");
+    await expect(sendAccountEmail({ to: "x@example.com", url: "https://app.test" })).rejects.toThrow(
+      "Resend send failed"
+    );
+  });
+});
+
+describe("sendOtpEmail", () => {
+  it("sends the OTP code with the correct Resend request shape", async () => {
+    sendMock.mockResolvedValue({ data: { id: "abc" }, error: null });
+
+    await sendOtpEmail({ to: "student@example.com", otp: "123456" });
+
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: ["student@example.com"],
+        subject: "Your sign-in code",
+      })
+    );
+    const call = sendMock.mock.calls[0][0];
+    expect(call.html).toContain("123456");
+  });
+
+  it("throws when Resend returns an error", async () => {
+    sendMock.mockResolvedValue({ data: null, error: { message: "bad request" } });
+
+    await expect(sendOtpEmail({ to: "x@example.com", otp: "000000" })).rejects.toThrow("Resend send failed");
   });
 });

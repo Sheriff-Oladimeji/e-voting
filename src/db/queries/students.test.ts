@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/auth-schema";
-import { importStudents, listStudents, updateStudent, removeStudent } from "./students";
+import { importStudents, listStudents, updateStudent, removeStudent, findStudentByMatricAndEmail } from "./students";
 
 const testUsernames = [
   "test-import-2022/900001",
@@ -102,5 +102,23 @@ describe("listStudents / updateStudent / removeStudent", () => {
     await removeStudent(found!.id);
     const afterRemoval = await db.select().from(user).where(eq(user.id, found!.id));
     expect(afterRemoval).toHaveLength(0);
+  });
+});
+
+describe("findStudentByMatricAndEmail", () => {
+  it("matches only when both the matric number and email are correct", async () => {
+    await importStudents([
+      { matric_number: testUsernames[0], name: "Amara Chukwu", email: "amara-import-test@example.com" },
+    ]);
+
+    const match = await findStudentByMatricAndEmail(testUsernames[0], "amara-import-test@example.com");
+    expect(match).not.toBeNull();
+    expect(match!.username).toBe(testUsernames[0]);
+
+    const wrongEmail = await findStudentByMatricAndEmail(testUsernames[0], "someone-else@example.com");
+    expect(wrongEmail).toBeNull();
+
+    const wrongMatric = await findStudentByMatricAndEmail("2099/000000", "amara-import-test@example.com");
+    expect(wrongMatric).toBeNull();
   });
 });

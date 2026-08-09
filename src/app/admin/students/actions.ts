@@ -5,7 +5,6 @@ import {
   importStudents,
   updateStudent,
   removeStudent,
-  resendInvite,
   type StudentImportRow,
   type StudentImportResult,
 } from "@/db/queries/students";
@@ -45,9 +44,4 @@ export async function removeStudentAction(userId: string) {
   await requireAdmin();
   await removeStudent(userId);
   revalidatePath("/admin/students");
-}
-
-export async function resendInviteAction(userId: string) {
-  await requireAdmin();
-  await resendInvite(userId);
 }

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
@@ -46,6 +46,9 @@ export async function importStudents(
     }
 
     try {
+      // The password here is unusable/never shared — students sign in with a
+      // one-time email code (see the emailOTP plugin in src/lib/auth.ts), never
+      // a password, so there's no "set your password" invite step to send.
       await auth.api.signUpEmail({
         body: { email, password: randomUUID(), name, username: matricNumber },
       });
@@ -53,14 +56,6 @@ export async function importStudents(
         .update(user)
         .set({ faculty: faculty || null, department: department || null })
         .where(eq(user.username, matricNumber));
-
-      // Best-effort invite email — a delivery failure shouldn't fail the whole import.
-      // The admin can always trigger a password reset for the student later.
-      try {
-        await auth.api.requestPasswordReset({ body: { email } });
-      } catch (emailErr) {
-        console.error(`Invite email failed for ${matricNumber}:`, emailErr);
-      }
 
       result.created++;
     } catch (err) {
@@ -100,8 +95,15 @@ export async function removeStudent(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-export async function resendInvite(userId: string) {
-  const [student] = await db.select().from(user).where(eq(user.id, userId));
-  if (!student) throw new Error("Student not found");
-  await auth.api.requestPasswordReset({ body: { email: student.email } });
+// Confirms a matric number and email belong to the same student record before
+// an OTP is sent — requiring both (not just a known email) means requesting a
+// code needs knowledge of the actual roster entry, not just an email address,
+// and gives students a clear "that doesn't match" error instead of a code
+// silently going nowhere on a typo.
+export async function findStudentByMatricAndEmail(matricNumber: string, email: string) {
+  const [student] = await db
+    .select()
+    .from(user)
+    .where(and(eq(user.username, matricNumber), eq(user.email, email), eq(user.role, "student")));
+  return student ?? null;
 }
