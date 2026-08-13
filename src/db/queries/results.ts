@@ -41,7 +41,7 @@ export async function getTurnoutForElection(electionId: string) {
   const byGroup = (key: "faculty" | "department") => {
     const groups = new Map<string, { eligible: number; voted: number }>();
     for (const s of eligibleStudents) {
-      const label = s[key] || "Unspecified";
+      const label = (s[key] ?? "").trim() || "Unspecified";
       const entry = groups.get(label) ?? { eligible: 0, voted: 0 };
       entry.eligible++;
       if (votedIds.has(s.id)) entry.voted++;
