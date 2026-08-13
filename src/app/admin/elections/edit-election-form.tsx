@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
 import { updateElectionAction } from "./actions";
 
@@ -47,6 +48,14 @@ export function EditElectionForm({
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!startAt || !endAt) {
+      setError("Pick both a start and end date.");
+      return;
+    }
+    if (new Date(endAt) <= new Date(startAt)) {
+      setError("The end date must be after the start date.");
+      return;
+    }
     setPending(true);
     setError(null);
     try {
@@ -73,27 +82,13 @@ export function EditElectionForm({
         <Input id="edit-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-startAt">Starts</Label>
-          <Input
-            id="edit-startAt"
-            type="datetime-local"
-            value={startAt}
-            onChange={(e) => setStartAt(e.target.value)}
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-endAt">Ends</Label>
-          <Input
-            id="edit-endAt"
-            type="datetime-local"
-            value={endAt}
-            onChange={(e) => setEndAt(e.target.value)}
-            required
-          />
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="edit-startAt">Starts</Label>
+        <DateTimePicker id="edit-startAt" value={startAt} onChange={setStartAt} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="edit-endAt">Ends</Label>
+        <DateTimePicker id="edit-endAt" value={endAt} onChange={setEndAt} />
       </div>
 
       <div className="flex flex-col gap-2">

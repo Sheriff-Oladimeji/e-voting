@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CandidatePhotoUpload } from "@/components/candidate-photo-upload";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { FACULTIES, departmentsForFaculty } from "@/lib/faculties";
 import { createElectionAction } from "./actions";
 
@@ -146,21 +147,13 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
             <Label htmlFor="title">Title</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="startAt">Starts</Label>
-              <Input
-                id="startAt"
-                type="datetime-local"
-                value={startAt}
-                onChange={(e) => setStartAt(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="endAt">Ends</Label>
-              <Input id="endAt" type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
-            </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="startAt">Starts</Label>
+            <DateTimePicker id="startAt" value={startAt} onChange={setStartAt} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="endAt">Ends</Label>
+            <DateTimePicker id="endAt" value={endAt} onChange={setEndAt} />
           </div>
         </div>
       )}
