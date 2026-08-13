@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,18 @@ export function VotingFlow({
   const [pending, setPending] = useState(false);
   const [confirmation, setConfirmation] = useState<{ referenceCode: string } | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
+
+  // The store is a single global instance, not scoped per election — without
+  // this, a search query typed while voting in one election (or an
+  // in-progress selection) would silently carry over and filter out
+  // otherwise-eligible candidates the next time a student opens a different
+  // election's voting page. Tied to electionId, not an empty dependency
+  // array, so a same-election router.refresh() (e.g. after a partial vote
+  // failure) doesn't wipe the selections clearSelections() just trimmed.
+  useEffect(() => {
+    reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [electionId]);
 
   const votedSet = useMemo(() => new Set(votedPositionIds), [votedPositionIds]);
   const unvotedPositions = positions.filter((p) => !votedSet.has(p.id));
