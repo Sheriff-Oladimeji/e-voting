@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, and, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { election, position, candidate, vote, ballot, type electionStatusEnum } from "@/db/schema";
 
@@ -56,15 +56,35 @@ export async function createElection(input: {
   return electionRow;
 }
 
+// No cron/queue in this project (see PROJECT.md's "keep it simple" scope note)
+// — an election's status is flipped from "active" to "closed" lazily, on the
+// next read, rather than by a scheduled job. The WHERE clause makes this a
+// no-op UPDATE once nothing is expired, so it's cheap to call from every read
+// path that touches elections.
+export async function closeExpiredElections() {
+  await db
+    .update(election)
+    .set({ status: "closed" })
+    .where(and(eq(election.status, "active"), lt(election.endAt, new Date())));
+}
+
 export async function listElections() {
+  await closeExpiredElections();
   return db.select().from(election).orderBy(election.startAt);
 }
 
 export async function listActiveElections() {
+  await closeExpiredElections();
   return db.select().from(election).where(eq(election.status, "active"));
 }
 
+export async function listClosedElections() {
+  await closeExpiredElections();
+  return db.select().from(election).where(eq(election.status, "closed"));
+}
+
 export async function getElection(electionId: string) {
+  await closeExpiredElections();
   const [row] = await db.select().from(election).where(eq(election.id, electionId));
   return row ?? null;
 }

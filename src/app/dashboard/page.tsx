@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Vote, CheckCircle2, Clock3, ArrowRight, GraduationCap } from "lucide-react";
-import { listActiveElections, listPositionsForElection } from "@/db/queries/elections";
+import { Vote, CheckCircle2, Clock3, ArrowRight, GraduationCap, Trophy } from "lucide-react";
+import { listActiveElections, listClosedElections, listPositionsForElection } from "@/db/queries/elections";
 import { listVotedPositionIds } from "@/db/queries/votes";
 import { getSessionUser } from "@/lib/get-session";
 import { isStudentEligibleForElection } from "@/lib/eligibility";
@@ -41,6 +41,10 @@ export default async function StudentHome() {
 
   const completeCount = elections.filter((e) => e.status === "complete").length;
   const pendingCount = elections.length - completeCount;
+
+  const closedElections = (await listClosedElections())
+    .filter((e) => isStudentEligibleForElection(e, student))
+    .sort((a, b) => new Date(b.endAt).getTime() - new Date(a.endAt).getTime());
 
   const statusMeta = {
     "not-started": { label: "Not started", badgeClass: "border-border text-muted-foreground" },
@@ -152,6 +156,37 @@ export default async function StudentHome() {
           </div>
         )}
       </div>
+
+      {closedElections.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-medium">Past elections</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Results are published once voting closes.</p>
+
+          <div className="mt-4 flex flex-col divide-y divide-border rounded-lg border border-border">
+            {closedElections.map((e) => (
+              <Link
+                key={e.id}
+                href={`/dashboard/results/${e.id}`}
+                className="flex items-center justify-between gap-4 p-4 hover:bg-muted/50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+                    <Trophy className="size-4 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{e.title}</p>
+                    <p className="text-xs text-muted-foreground">Closed {new Date(e.endAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  Results
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

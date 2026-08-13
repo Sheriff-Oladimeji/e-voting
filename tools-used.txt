@@ -1,0 +1,15 @@
+Frontend: Next.js 16 and Tailwind CSS formed the user-facing interface, with shadcn/ui (built on Base UI primitives) supplying the component layer. Next.js was chosen over plain React because it is a full-stack framework, letting the same project serve the admin dashboard, the student voting flow, and the server-side logic through the App Router and server actions. Tailwind CSS and shadcn/ui kept the design consistent across the election setup, candidate management, and voting pages, while Zustand held small pieces of client-side state (candidate search query, in-progress vote selections) that didn't need to round-trip to the server.
+
+Server-side logic: Next.js server actions and route handlers handled all mutating operations — student import, election and candidate management, vote casting, results export — with authentication and session handling delegated to Better Auth. Every admin-sensitive action re-checks the caller's role server-side rather than relying on route-level middleware, since server actions are reachable independently of the page that renders them.
+
+Authentication: Better Auth handled both admin sign-in (username + password) and student sign-in (matric number + email, verified against the student roster, followed by a one-time email code — no password ever issued to students). This dual-flow setup was chosen because it fit the admin/student trust boundary directly, rather than building a custom session layer.
+
+Email: Resend delivered the one-time sign-in codes to students and password-reset links to admins. It was picked for its simple API and native Better Auth integration, without needing a general-purpose notification system.
+
+File uploads: UploadThing handled candidate photo uploads, giving admins real image uploads instead of pasting external URLs, without needing to stand up or manage a storage bucket directly.
+
+Database: A PostgreSQL database, hosted on Neon and accessed through the Drizzle ORM, served as the persistent store for students, admins, elections, positions, candidates, ballots, and anonymized votes. A relational database was chosen because voting integrity depends on constraints a document database can't enforce as naturally — most importantly a unique constraint on (student, position) that makes double-voting impossible at the database level, not just in application logic.
+
+Testing: Vitest covered the query and server-action layer (eligibility rules, vote casting, CSV import, auth flows) to keep the security- and integrity-sensitive logic verified as it changed.
+
+Deployment: Git was used for version control with the codebase hosted on GitHub, targeting a single Next.js project for deployment (e.g. Vercel) so the same build serves both the student and admin sides from one public URL.

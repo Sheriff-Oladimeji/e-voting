@@ -69,6 +69,15 @@ export default async function ElectionsPage() {
                         <Button variant="outline" size="sm" render={<Link href={`/admin/elections/${e.id}`} />}>
                           Manage
                         </Button>
+                        {e.status === "closed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            render={<Link href={`/admin/elections/${e.id}/results`} />}
+                          >
+                            Results
+                          </Button>
+                        )}
                         <ElectionStatusControl electionId={e.id} status={e.status} />
                         <EditElectionDialog
                           electionId={e.id}

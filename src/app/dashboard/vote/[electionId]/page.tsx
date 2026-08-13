@@ -20,6 +20,11 @@ export default async function VoteElectionPage({
   const election = await getElection(electionId);
   if (!election) notFound();
 
+  // getElection() lazily flips a past-due election to "closed" on read, so a
+  // student who had this vote link open (or clicked an old one) lands on the
+  // results page instead of a bare 404 once time runs out.
+  if (election.status === "closed") redirect(`/dashboard/results/${electionId}`);
+
   const student = {
     faculty: (user as { faculty?: string }).faculty ?? null,
     department: (user as { department?: string }).department ?? null,

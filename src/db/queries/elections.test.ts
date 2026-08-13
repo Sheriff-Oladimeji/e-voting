@@ -2,7 +2,15 @@ import { describe, it, expect, afterEach } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { election, position, candidate, vote } from "@/db/schema";
-import { createElection, getElection, listPositionsForElection, updateElectionStatus, updateElection, deleteElection } from "./elections";
+import {
+  createElection,
+  getElection,
+  listPositionsForElection,
+  listActiveElections,
+  updateElectionStatus,
+  updateElection,
+  deleteElection,
+} from "./elections";
 import { addCandidate } from "./candidates";
 import { castVote } from "./votes";
 
@@ -67,6 +75,40 @@ describe("updateElectionStatus", () => {
     await updateElectionStatus(created.id, "active");
     const updated = await getElection(created.id);
     expect(updated?.status).toBe("active");
+  });
+});
+
+describe("closeExpiredElections (lazy auto-close)", () => {
+  it("flips an active election to closed once its end time has passed, on the next read", async () => {
+    const created = await createElection({
+      title: "Expired Election",
+      startAt: new Date(Date.now() - 1000 * 60 * 60),
+      endAt: new Date(Date.now() - 1000), // already in the past
+      positionTitles: ["President"],
+      eligibleFaculties: [],
+      eligibleDepartments: [],
+    });
+    createdElectionId = created.id;
+    await updateElectionStatus(created.id, "active");
+
+    const updated = await getElection(created.id);
+    expect(updated?.status).toBe("closed");
+  });
+
+  it("does not close an active election whose end time hasn't passed yet", async () => {
+    const created = await createElection({
+      title: "Still Open Election",
+      startAt: new Date(),
+      endAt: new Date(Date.now() + 1000 * 60 * 60),
+      positionTitles: ["President"],
+      eligibleFaculties: [],
+      eligibleDepartments: [],
+    });
+    createdElectionId = created.id;
+    await updateElectionStatus(created.id, "active");
+
+    const active = await listActiveElections();
+    expect(active.map((e) => e.id)).toContain(created.id);
   });
 });
 
