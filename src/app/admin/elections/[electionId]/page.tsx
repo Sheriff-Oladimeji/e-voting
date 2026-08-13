@@ -57,7 +57,12 @@ export default async function ElectionDetailPage({
             <Card key={pos.id}>
               <CardHeader className="flex-row items-center justify-between">
                 <CardTitle>{pos.title}</CardTitle>
-                <AddCandidateDialog electionId={electionId} positionId={pos.id} positionTitle={pos.title} />
+                <AddCandidateDialog
+                  electionId={electionId}
+                  positionId={pos.id}
+                  positionTitle={pos.title}
+                  electionFaculty={election.eligibleFaculties?.[0] ?? null}
+                />
               </CardHeader>
               <CardContent className="flex flex-col divide-y divide-border p-0">
                 {posCandidates.length === 0 && (

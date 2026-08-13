@@ -17,10 +17,12 @@ export function AddCandidateDialog({
   electionId,
   positionId,
   positionTitle,
+  electionFaculty,
 }: {
   electionId: string;
   positionId: string;
   positionTitle: string;
+  electionFaculty: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -38,7 +40,12 @@ export function AddCandidateDialog({
           <DialogTitle>Add candidate</DialogTitle>
           <DialogDescription>Running for {positionTitle}.</DialogDescription>
         </DialogHeader>
-        <AddCandidateForm electionId={electionId} positionId={positionId} onAdded={() => setOpen(false)} />
+        <AddCandidateForm
+          electionId={electionId}
+          positionId={positionId}
+          electionFaculty={electionFaculty}
+          onAdded={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -104,7 +104,12 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
         positionTitles: finalPositions,
         eligibleFaculties: faculty === ANY_FACULTY ? [] : [faculty],
         eligibleDepartments: faculty === ANY_FACULTY ? [] : departments,
-        positionCandidates: finalPositions.map((_, i) => candidatesByPosition[i] ?? []),
+        // When the election is scoped to one faculty, that faculty is
+        // implied for every candidate — the faculty field is hidden from
+        // the form below, so it never got set on the draft itself.
+        positionCandidates: finalPositions.map((_, i) =>
+          (candidatesByPosition[i] ?? []).map((c) => (faculty !== ANY_FACULTY ? { ...c, faculty } : c))
+        ),
       });
       router.refresh();
       onCreated();
@@ -252,93 +257,107 @@ export function CreateElectionWizard({ onCreated }: { onCreated: () => void }) {
           <p className="text-sm text-muted-foreground">
             Add candidates now, or skip this and add them later from the election page.
           </p>
-          {finalPositions.map((posTitle, i) => (
-            <div key={i} className="flex flex-col gap-3 rounded-lg border border-border p-4">
-              <p className="font-medium">{posTitle}</p>
+          {finalPositions.map((posTitle, i) => {
+            // The election is already scoped to one faculty (set in the
+            // Eligibility step) — no point asking for it again per candidate.
+            const isFacultyScoped = faculty !== ANY_FACULTY;
+            const candidateDepartments = departmentsForFaculty(isFacultyScoped ? faculty : draftFor(i).faculty);
+            const candidateDisplayFaculty = isFacultyScoped ? faculty : draftFor(i).faculty;
 
-              {(candidatesByPosition[i] ?? []).length > 0 && (
-                <div className="flex flex-col divide-y divide-border rounded-md border border-border">
-                  {(candidatesByPosition[i] ?? []).map((c, ci) => (
-                    <div key={ci} className="flex items-center justify-between gap-4 px-3 py-2">
-                      <div>
-                        <p className="text-sm font-medium">{c.name}</p>
-                        {(c.faculty || c.department) && (
-                          <p className="text-xs text-muted-foreground">
-                            {[c.faculty, c.department].filter(Boolean).join(" — ")}
-                          </p>
-                        )}
+            return (
+              <div key={i} className="flex flex-col gap-3 rounded-lg border border-border p-4">
+                <p className="font-medium">{posTitle}</p>
+
+                {(candidatesByPosition[i] ?? []).length > 0 && (
+                  <div className="flex flex-col divide-y divide-border rounded-md border border-border">
+                    {(candidatesByPosition[i] ?? []).map((c, ci) => (
+                      <div key={ci} className="flex items-center justify-between gap-4 px-3 py-2">
+                        <div>
+                          <p className="text-sm font-medium">{c.name}</p>
+                          {(candidateDisplayFaculty || c.department) && (
+                            <p className="text-xs text-muted-foreground">
+                              {[isFacultyScoped ? candidateDisplayFaculty : c.faculty, c.department]
+                                .filter(Boolean)
+                                .join(" — ")}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Remove candidate"
+                          onClick={() => removeCandidateDraft(i, ci)}
+                        >
+                          <X className="size-4" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Remove candidate"
-                        onClick={() => removeCandidateDraft(i, ci)}
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              <Input
-                placeholder="Candidate name"
-                value={draftFor(i).name}
-                onChange={(e) => updateDraft(i, { name: e.target.value })}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <Select
-                  value={draftFor(i).faculty || undefined}
-                  onValueChange={(value) => updateDraft(i, { faculty: value ?? "", department: "" })}
+                <Input
+                  placeholder="Candidate name"
+                  value={draftFor(i).name}
+                  onChange={(e) => updateDraft(i, { name: e.target.value })}
+                />
+                <div className={isFacultyScoped ? "" : "grid grid-cols-2 gap-3"}>
+                  {!isFacultyScoped && (
+                    <Select
+                      value={draftFor(i).faculty || undefined}
+                      onValueChange={(value) => updateDraft(i, { faculty: value ?? "", department: "" })}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Faculty (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FACULTIES.map((f) => (
+                          <SelectItem key={f.name} value={f.name}>
+                            {f.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Select
+                    value={draftFor(i).department || undefined}
+                    onValueChange={(value) => updateDraft(i, { department: value ?? "" })}
+                    disabled={!isFacultyScoped && !draftFor(i).faculty}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue
+                        placeholder={isFacultyScoped || draftFor(i).faculty ? "Department (optional)" : "Pick a faculty first"}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {candidateDepartments.map((d) => (
+                        <SelectItem key={d} value={d}>
+                          {d}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <CandidatePhotoUpload value={draftFor(i).photoUrl} onChange={(url) => updateDraft(i, { photoUrl: url })} />
+                <Textarea
+                  placeholder="Manifesto (optional)"
+                  rows={2}
+                  value={draftFor(i).manifesto}
+                  onChange={(e) => updateDraft(i, { manifesto: e.target.value })}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  onClick={() => addCandidateDraft(i)}
+                  disabled={!draftFor(i).name.trim()}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Faculty (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FACULTIES.map((f) => (
-                      <SelectItem key={f.name} value={f.name}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={draftFor(i).department || undefined}
-                  onValueChange={(value) => updateDraft(i, { department: value ?? "" })}
-                  disabled={!draftFor(i).faculty}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={draftFor(i).faculty ? "Department (optional)" : "Pick a faculty first"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departmentsForFaculty(draftFor(i).faculty).map((d) => (
-                      <SelectItem key={d} value={d}>
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Plus className="size-4" /> Add candidate
+                </Button>
               </div>
-              <CandidatePhotoUpload value={draftFor(i).photoUrl} onChange={(url) => updateDraft(i, { photoUrl: url })} />
-              <Textarea
-                placeholder="Manifesto (optional)"
-                rows={2}
-                value={draftFor(i).manifesto}
-                onChange={(e) => updateDraft(i, { manifesto: e.target.value })}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onClick={() => addCandidateDraft(i)}
-                disabled={!draftFor(i).name.trim()}
-              >
-                <Plus className="size-4" /> Add candidate
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

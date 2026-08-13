@@ -15,10 +15,12 @@ import { addCandidateAction } from "./actions";
 export function AddCandidateForm({
   electionId,
   positionId,
+  electionFaculty,
   onAdded,
 }: {
   electionId: string;
   positionId: string;
+  electionFaculty: string | null;
   onAdded: () => void;
 }) {
   const router = useRouter();
@@ -30,7 +32,11 @@ export function AddCandidateForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const availableDepartments = faculty ? departmentsForFaculty(faculty) : [];
+  // The election is already scoped to one faculty — no point asking for it
+  // again per candidate, so that field is hidden entirely below.
+  const isFacultyScoped = electionFaculty !== null;
+  const effectiveFaculty = isFacultyScoped ? electionFaculty : faculty;
+  const availableDepartments = effectiveFaculty ? departmentsForFaculty(effectiveFaculty) : [];
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,7 +48,7 @@ export function AddCandidateForm({
         name,
         photoUrl,
         manifesto,
-        faculty: faculty ?? "",
+        faculty: effectiveFaculty ?? "",
         department: department ?? "",
       });
       router.refresh();
@@ -60,33 +66,35 @@ export function AddCandidateForm({
         <Label htmlFor={`name-${positionId}`}>Name</Label>
         <Input id={`name-${positionId}`} value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor={`faculty-${positionId}`}>Faculty</Label>
-          <Select
-            value={faculty ?? undefined}
-            onValueChange={(value) => {
-              setFaculty(value);
-              setDepartment(null);
-            }}
-          >
-            <SelectTrigger id={`faculty-${positionId}`} className="w-full">
-              <SelectValue placeholder="Select faculty" />
-            </SelectTrigger>
-            <SelectContent>
-              {FACULTIES.map((f) => (
-                <SelectItem key={f.name} value={f.name}>
-                  {f.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className={isFacultyScoped ? "" : "grid grid-cols-2 gap-3"}>
+        {!isFacultyScoped && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={`faculty-${positionId}`}>Faculty</Label>
+            <Select
+              value={faculty ?? undefined}
+              onValueChange={(value) => {
+                setFaculty(value);
+                setDepartment(null);
+              }}
+            >
+              <SelectTrigger id={`faculty-${positionId}`} className="w-full">
+                <SelectValue placeholder="Select faculty" />
+              </SelectTrigger>
+              <SelectContent>
+                {FACULTIES.map((f) => (
+                  <SelectItem key={f.name} value={f.name}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           <Label htmlFor={`department-${positionId}`}>Department</Label>
-          <Select value={department ?? undefined} onValueChange={setDepartment} disabled={!faculty}>
+          <Select value={department ?? undefined} onValueChange={setDepartment} disabled={!effectiveFaculty}>
             <SelectTrigger id={`department-${positionId}`} className="w-full">
-              <SelectValue placeholder={faculty ? "Select department" : "Pick a faculty first"} />
+              <SelectValue placeholder={effectiveFaculty ? "Select department" : "Pick a faculty first"} />
             </SelectTrigger>
             <SelectContent>
               {availableDepartments.map((d) => (
